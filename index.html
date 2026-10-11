@@ -157,7 +157,7 @@ const col=(ids)=>{const h=ids.map(tile).join('');return `<div class="track">${h}
 function landing(session){
   app.classList.add('wide');
   app.innerHTML=`
-  <header class="nav"><a class="logo" data-nav href="${location.pathname}">✦ Momentkan</a><button class="sm ghost" data-go>${session?'Dashboard':'Masuk'}</button></header>
+  <header class="nav"><a class="logo" data-nav href="${location.pathname}">✦ Momentkan</a><span class="row" style="gap:8px"><button class="sm ghost" data-go>${session?'Dashboard':'Masuk'}</button>${session?'<button class="sm ghost" data-out>Keluar</button>':''}</span></header>
   <section class="hero">
     <div>
       <h1>Semua momen, dari semua sudut.</h1>
@@ -207,11 +207,12 @@ function landing(session){
     <p id="lm"></p><button class="full">Kirim link masuk</button></form></div></section>`;
 
   const login=document.getElementById('login');
-  if(session)login.innerHTML='<div class="cta"><div class="card"><h2>Kamu sudah masuk</h2><p>Lanjut ke dashboard untuk membuat atau mengelola album.</p><button class="full" data-go>Buka dashboard</button></div></div>';
+  if(session)login.innerHTML='<div class="cta"><div class="card"><h2>Kamu sudah masuk</h2><p>Akun: '+esc(session.user.email||'')+'</p><p>Lanjut ke dashboard untuk membuat atau mengelola album.</p><button class="full" data-go>Buka dashboard</button><button class="full ghost" data-out>Keluar</button></div></div>';
   const er=new URLSearchParams(location.hash.slice(1)).get('error_description')||new URLSearchParams(location.search).get('error_description');
   if(er&&!session){const m=document.getElementById('lm');m.className='err';m.textContent='Login gagal: '+er;history.replaceState({},'',location.pathname);setTimeout(()=>login.scrollIntoView(),300)}
   app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(session)return nav('?app=1');login.scrollIntoView({behavior:'smooth'});setTimeout(()=>document.getElementById('em').focus({preventScroll:true}),500)});
   app.querySelectorAll('a[href="#how"]').forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById('how').scrollIntoView({behavior:'smooth'})});
+  app.querySelectorAll('[data-out]').forEach(b=>b.onclick=async()=>{await sb.auth.signOut();nav(location.pathname)});
   const ph=app.querySelector('.phone');
   app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ph.dataset.f=c.dataset.f;app.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c))});
   const names=['Rina','Bima','Sari','Eko','Maya','Tomi','Dina','Raka'];let n=128,k=0;
@@ -244,14 +245,14 @@ async function owner() {
     history.replaceState({}, '', location.pathname);
     history.pushState({}, '', '?app=1');
   }
-  const { data } = await sb.from('events').select('*').order('created_at', { ascending: false });
+  const { data } = await sb.from('events').select('*').eq('owner_id', session.user.id).order('created_at', { ascending: false });
   const list = data || [];
   app.innerHTML = hdr() + `<form id="cf" class="card"><h2>Buat album acara</h2>
   <label for="n">Nama acara</label><input id="n" required maxlength="60" placeholder="Pernikahan Dina &amp; Raka">
   <label for="r">Foto dibuka untuk dilihat pada (opsional)</label><input id="r" type="datetime-local">
   <label for="x">Kamera tamu ditutup pada (opsional)</label><input id="x" type="datetime-local">
   <button class="full">Buat album</button></form>
-  <div class="row spread"><h2>Album kamu</h2><button class="sm ghost" id="lo">Keluar</button></div>
+  <p>Masuk sebagai ${esc(session.user.email || '')}</p><div class="row spread"><h2>Album kamu</h2><button class="sm ghost" id="lo">Keluar</button></div>
   ${list.length ? list.map(e => `<a class="card row spread" data-nav style="text-decoration:none;color:inherit" href="?d=${e.id}"><b>${esc(e.name)}</b></a>`).join('') : '<div class="empty">Belum ada album.</div>'}`;
   document.getElementById('lo').onclick = async () => { await sb.auth.signOut(); nav(location.pathname); };
   document.getElementById('cf').onsubmit = async ev => {
@@ -320,7 +321,8 @@ function film(c, f) {
 }
 
 async function guest(id) {
-  const { data: e } = await sb.from('events').select('*').eq('id', id).maybeSingle();
+  const gr = await sb.rpc('get_event', { eid: id });
+  const e = gr.data && gr.data[0];
   if (!e) { app.innerHTML = hdr() + '<div class="empty"><h2>Album tidak ditemukan</h2><p>Periksa kembali QR atau linknya.</p></div>'; return; }
   if (e.ends_at && new Date(e.ends_at) < new Date()) { app.innerHTML = hdr() + `<div class="empty"><h2>${esc(e.name)}</h2><p>Kamera sudah ditutup. Terima kasih sudah ikut mengabadikan momen ini!</p></div>`; return; }
   let name = localStorage.getItem('sr_name') || '', n = Number(localStorage.getItem('sr_n_' + id) || 0), curF = 'original', img = null;
