@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Satu Roll – Kamera tamu lewat QR</title>
+<title>Momentkan – Kamera tamu lewat QR</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
@@ -44,6 +44,62 @@ button:disabled{opacity:.5}
 .empty{text-align:center;color:var(--mut);padding:24px 0}
 .tag{font-size:.75rem;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--mut)}
 .err{color:#ff8a7a}
+
+main.wide{max-width:1040px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.nav .logo{margin:0}
+.hero{display:grid;gap:32px;align-items:center;padding:16px 0 40px}
+@media(min-width:820px){.hero{grid-template-columns:1.1fr .9fr;padding:48px 0 64px}}
+.hero h1{font-size:clamp(2.6rem,9vw,4.6rem)}
+.hero .lead{font-size:1.1rem;max-width:34em;margin:16px 0 24px}
+.mini{font-size:.85rem}
+.phonewrap{display:flex;flex-direction:column;align-items:center;gap:16px}
+.phone{position:relative;width:min(280px,78vw);aspect-ratio:9/18.5;background:#000;border-radius:38px;padding:9px;border:2px solid #4a4435;box-shadow:0 30px 70px rgba(0,0,0,.6),0 0 0 6px #201d16;transform:rotate(-3deg)}
+.screen{position:relative;width:100%;height:100%;border-radius:30px;overflow:hidden;background:#100e0b}
+.notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:84px;height:22px;background:#000;border-radius:14px;z-index:5}
+.pbar{position:absolute;top:0;left:0;right:0;z-index:4;padding:38px 14px 12px;background:linear-gradient(#100e0b 70%,transparent)}
+.pbar b{font:800 .95rem 'Syne';display:block}
+.pbar span{font-size:.72rem;color:var(--mut)}
+.pbar em{color:var(--ac);font-style:normal;font-weight:700}
+.cols{position:absolute;inset:0;display:flex;gap:6px;padding:0 6px}
+.col{flex:1;overflow:hidden}
+.track{display:flex;flex-direction:column;gap:6px;animation:up 28s linear infinite}
+.col.b .track{animation-direction:reverse;animation-duration:34s}
+@keyframes up{to{transform:translateY(-50%)}}
+.tile{position:relative;border-radius:4px;overflow:hidden;aspect-ratio:3/4;flex:none;transition:filter .4s}
+.tile svg{width:100%;height:100%;display:block}
+.tile::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.45));mix-blend-mode:multiply;pointer-events:none}
+.tile i{position:absolute;left:5px;bottom:4px;font:normal 700 .6rem 'DM Sans';color:#fff;text-shadow:0 1px 3px #000}
+.phone[data-f=kodak] .tile{filter:sepia(.28) saturate(1.3) contrast(1.06)}
+.phone[data-f=fuji] .tile{filter:hue-rotate(14deg) saturate(1.1) contrast(1.05) brightness(1.04)}
+.phone[data-f=bw] .tile{filter:grayscale(1) contrast(1.25)}
+.toast{position:absolute;left:12px;right:12px;bottom:16px;z-index:5;background:rgba(244,180,0,.96);color:#15130f;font:700 .75rem 'DM Sans';padding:8px 12px;border-radius:999px;text-align:center;transform:translateY(80px);transition:transform .35s}
+.toast.on{transform:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{padding:7px 14px!important;font-size:.85rem!important}
+.chip.on{background:var(--ac)!important;color:#15130f!important;border-color:var(--ac)!important}
+.sec{padding:40px 0}
+.sec h2{font-size:clamp(1.8rem,5vw,2.6rem);margin-bottom:8px}
+.steps{display:grid;gap:12px;margin-top:20px}
+@media(min-width:700px){.steps{grid-template-columns:repeat(4,1fr)}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:default;transition:transform .2s,border-color .2s}
+.step:hover{transform:translateY(-4px);border-color:var(--ac)}
+.step .n{font:800 2rem 'Syne';color:var(--ac)}
+.step h3{margin:6px 0 4px;font:700 1.05rem 'DM Sans'}
+.step p{margin:0;font-size:.92rem}
+.feat{display:grid;gap:20px;margin-top:20px}
+@media(min-width:700px){.feat{grid-template-columns:repeat(3,1fr)}}
+.feat h3{margin:0 0 4px;font:700 1.05rem 'DM Sans'}
+.feat p{margin:0}
+details{border-bottom:1px solid var(--line);padding:14px 0}
+summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between}
+summary::after{content:'+';color:var(--ac);font-size:1.3rem;line-height:1}
+details[open] summary::after{content:'–'}
+details p{margin:8px 0 0}
+.rv{opacity:0;transform:translateY(18px);transition:opacity .6s,transform .6s}
+.rv.in{opacity:1;transform:none}
+.cta{max-width:460px;margin:0 auto}
+@media(prefers-reduced-motion:reduce){.track{animation:none}.rv{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
@@ -62,7 +118,7 @@ const fmt = t => new Date(t).toLocaleString('id-ID', { dateStyle: 'medium', time
 const revealed = e => !e.reveal_at || new Date(e.reveal_at) <= new Date();
 const purl = p => sb.storage.from('photos').getPublicUrl(p).data.publicUrl;
 const base = () => location.origin + location.pathname;
-const hdr = () => '<a class="logo" data-nav href="' + location.pathname + '">✦ Satu Roll</a>';
+const hdr = () => '<a class="logo" data-nav href="' + location.pathname + '">✦ Momentkan</a>';
 let stream = null;
 const stop = () => { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } };
 const nav = u => { history.pushState({}, '', u); route(); };
@@ -76,29 +132,102 @@ sb.auth.onAuthStateChange((ev, s) => {
 });
 
 async function route() {
-  stop();
+  stop(); app.classList.remove('wide');
   const p = new URLSearchParams(location.search);
   if (p.get('e')) return guest(p.get('e'));
   if (p.get('d')) return dash(p.get('d'));
   return home();
 }
 
+
+const SC=[
+ ['#f6a04d','#e8567a',x=>`<circle cx="50" cy="62" r="18" fill="#fff3c4"/><path d="M0 100Q30 80 55 98T100 90V130H0Z" fill="#3b2a4a"/>`,'Rina'],
+ ['#7fc8d8','#f7e3b5',x=>`<g stroke="#fff" stroke-width="1"><path d="M30 60V105M52 50V105M72 64V105"/></g><circle cx="30" cy="50" r="14" fill="#ef5b5b"/><circle cx="52" cy="38" r="15" fill="#f4b400"/><circle cx="72" cy="52" r="13" fill="#5b8def"/>`,'Bima'],
+ ['#2d2b3f','#7a3b5e',x=>`<path d="M50 92C20 70 24 42 42 44c6 0 8 4 8 8 0 -4 2 -8 8 -8 18 -2 22 26 -8 48Z" fill="#ff7a8a"/>`,'Dina'],
+ ['#fbd9c4','#c98b7a',x=>`<rect x="26" y="70" width="48" height="26" rx="3" fill="#fff"/><rect x="34" y="50" width="32" height="20" rx="3" fill="#f7c6d0"/><rect x="48" y="36" width="4" height="14" fill="#f4b400"/><circle cx="50" cy="33" r="4" fill="#ff9b3d"/>`,'Sari'],
+ ['#1f4d4a','#d9b26f',x=>`<circle cx="42" cy="66" r="18" fill="none" stroke="#f6d98b" stroke-width="5"/><circle cx="60" cy="66" r="18" fill="none" stroke="#fff3c4" stroke-width="5"/>`,'Raka'],
+ ['#3b2f6b','#e86f9a',x=>`${[[20,30,5],[70,24,4],[40,52,6],[82,70,5],[26,86,4],[58,96,6]].map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="${c[2]}" fill="#f4b400"/>`).join('')}<circle cx="50" cy="75" r="16" fill="#fff3c4"/>`,'Tomi'],
+ ['#b8d8a8','#f2efc9',x=>`<path d="M16 120V60A34 34 0 0 1 84 60V120" fill="none" stroke="#fff" stroke-width="7"/><circle cx="22" cy="58" r="7" fill="#ef7b9b"/><circle cx="78" cy="58" r="7" fill="#f4b400"/><circle cx="50" cy="26" r="7" fill="#ef7b9b"/>`,'Maya'],
+ ['#ff9a5a','#8a3b6b',x=>`<path d="M0 104Q40 70 100 100V130H0Z" fill="#2b1d3a"/><circle cx="72" cy="50" r="12" fill="#ffe08a"/>`,'Eko']
+];
+const tile=i=>{const s=SC[i%8];return `<div class="tile"><svg viewBox="0 0 100 130" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s[0]}"/><stop offset="1" stop-color="${s[1]}"/></linearGradient></defs><rect width="100" height="130" fill="url(#g${i})"/>${s[2]()}</svg><i>${s[3]}</i></div>`};
+const col=(ids)=>{const h=ids.map(tile).join('');return `<div class="track">${h}${h}</div>`};
+
+function landing(){
+  app.classList.add('wide');
+  app.innerHTML=`
+  <header class="nav"><a class="logo" data-nav href="${location.pathname}">✦ Momentkan</a><button class="sm ghost" data-go>Masuk</button></header>
+  <section class="hero">
+    <div>
+      <h1>Semua momen, dari semua sudut.</h1>
+      <p class="lead">Momentkan mengubah HP setiap tamu menjadi kamera sekali pakai. Mereka scan QR, jepret, dan semua foto berkumpul di satu album milikmu — tanpa aplikasi, tanpa daftar.</p>
+      <div class="row"><button data-go>Buat album acara</button><a class="btn ghost" href="#how">Lihat cara kerja</a></div>
+      <p class="mini">Cocok untuk pernikahan, ulang tahun, reuni, sampai liburan bareng.</p>
+    </div>
+    <div class="phonewrap">
+      <div class="phone" data-f="kodak"><div class="notch"></div><div class="screen">
+        <div class="pbar"><b>Pernikahan Dina &amp; Raka</b><span><em id="pc">128</em> momen dari <em>34</em> tamu</span></div>
+        <div class="cols"><div class="col a">${col([0,1,2,3,4,5,6,7])}</div><div class="col b">${col([4,7,1,5,2,6,3,0])}</div></div>
+        <div class="toast" id="ts"></div>
+      </div></div>
+      <div class="chips" role="group" aria-label="Pilih gaya film">
+        <button class="chip ghost on" data-f="kodak">Kodak hangat</button><button class="chip ghost" data-f="fuji">Fuji sejuk</button><button class="chip ghost" data-f="bw">Hitam putih</button>
+      </div>
+      <p class="mini">Coba ganti gaya film — tampilan album ikut berubah.</p>
+    </div>
+  </section>
+
+  <section class="sec rv" id="how"><h2>Dari satu hari jadi satu album</h2><p>Empat langkah, semuanya dari HP.</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Buat album</h3><p>Beri nama acara, pilih gaya film, dan atur kapan foto boleh dilihat.</p></div>
+      <div class="step"><div class="n">2</div><h3>Bagikan QR</h3><p>Cetak QR atau kirim link ke grup. Tempel di meja tamu.</p></div>
+      <div class="step"><div class="n">3</div><h3>Tamu memotret</h3><p>Scan, kamera langsung terbuka, dan foto otomatis diberi efek film.</p></div>
+      <div class="step"><div class="n">4</div><h3>Buka albumnya</h3><p>Setelah acara, buka album dan unduh semua kenangan.</p></div>
+    </div></section>
+
+  <section class="sec rv"><h2>Kenapa Momentkan</h2>
+    <div class="feat">
+      <div><h3>Tanpa aplikasi</h3><p>Tamu cukup membuka kamera HP dan scan QR. Berfungsi di iPhone, Android, dan komputer.</p></div>
+      <div><h3>Rasa kamera sekali pakai</h3><p>Setiap foto diberi warna, grain, dan vignette ala film, jadi hasilnya terasa seperti kenangan.</p></div>
+      <div><h3>Kejutan di akhir</h3><p>Foto terkunci sampai kamu membukanya, jadi semua orang melihat hasilnya bersamaan.</p></div>
+    </div></section>
+
+  <section class="sec rv"><h2>Pertanyaan umum</h2>
+    <details><summary>Apakah tamu perlu install aplikasi?</summary><p>Tidak. Tamu cukup scan QR atau membuka link di browser HP mereka.</p></details>
+    <details><summary>Kapan saya bisa melihat fotonya?</summary><p>Kamu yang menentukan: atur jadwal buka saat membuat album, atau tekan "Buka sekarang" kapan saja.</p></details>
+    <details><summary>Bisakah foto diunduh?</summary><p>Bisa. Setiap foto dapat diunduh dari dashboard setelah album dibuka.</p></details>
+    <details><summary>Bagaimana kalau acara sudah selesai?</summary><p>Kamu bisa menutup kamera tamu pada waktu tertentu, sehingga tidak ada foto baru yang masuk.</p></details>
+  </section>
+
+  <section class="sec rv" id="login"><div class="cta"><form id="lf" class="card"><h2>Mulai buat album</h2>
+    <p>Masukkan email, kami kirim link masuk. Tanpa password.</p>
+    <label for="em">Email</label><input id="em" type="email" required placeholder="kamu@email.com">
+    <p id="lm"></p><button class="full">Kirim link masuk</button></form></div></section>`;
+
+  const login=document.getElementById('login');
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{login.scrollIntoView({behavior:'smooth'});setTimeout(()=>document.getElementById('em').focus({preventScroll:true}),500)});
+  app.querySelectorAll('a[href="#how"]').forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById('how').scrollIntoView({behavior:'smooth'})});
+  const ph=app.querySelector('.phone');
+  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ph.dataset.f=c.dataset.f;app.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c))});
+  const names=['Rina','Bima','Sari','Eko','Maya','Tomi','Dina','Raka'];let n=128,k=0;
+  clearInterval(window._tt);
+  window._tt=setInterval(()=>{
+    const ts=document.getElementById('ts');if(!ts){clearInterval(window._tt);return}
+    n++;k++;document.getElementById('pc').textContent=n;
+    ts.textContent='+1 foto dari '+names[k%names.length];ts.classList.add('on');setTimeout(()=>ts.classList.remove('on'),1800);
+  },3200);
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+  app.querySelectorAll('.rv').forEach(el=>io.observe(el));
+  document.getElementById('lf').onsubmit=async ev=>{
+    ev.preventDefault();
+    const {error}=await sb.auth.signInWithOtp({email:document.getElementById('em').value,options:{emailRedirectTo:base()}});
+    const m=document.getElementById('lm');m.className=error?'err':'';m.textContent=error?error.message:'Cek email kamu dan buka link masuknya.';
+  };
+}
+
 async function home() {
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    app.innerHTML = hdr() + `<h1>Satu QR.<br>Semua sudut pandang.</h1>
-    <p>Tamu scan QR, motret dari HP sendiri tanpa install aplikasi. Semua foto bertemu di dashboard kamu.</p>
-    <form id="lf" class="card"><h2>Masuk sebagai pemilik acara</h2>
-    <label for="em">Email</label><input id="em" type="email" required placeholder="kamu@email.com">
-    <p id="lm"></p><button class="full">Kirim link masuk</button></form>`;
-    document.getElementById('lf').onsubmit = async ev => {
-      ev.preventDefault();
-      const { error } = await sb.auth.signInWithOtp({ email: document.getElementById('em').value, options: { emailRedirectTo: base() } });
-      const m = document.getElementById('lm');
-      m.className = error ? 'err' : ''; m.textContent = error ? error.message : 'Cek email kamu dan buka link masuknya.';
-    };
-    return;
-  }
+  if (!session) return landing();
   const { data } = await sb.from('events').select('*').order('created_at', { ascending: false });
   const list = data || [];
   app.innerHTML = hdr() + `<form id="cf" class="card"><h2>Buat album acara</h2>
