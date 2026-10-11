@@ -201,6 +201,8 @@ details p{margin:8px 0 0}
 .ths img{border:0;transform:none;border-radius:10px;height:92px;display:block}
 .phone .tile{filter:var(--ft,none)}
 .tile i{font-size:.62rem}
+.thb.pend{opacity:.55;position:relative}
+.thb.pend::after{content:"Mengirim…";position:absolute;left:0;right:0;bottom:4px;font-size:.62rem;font-weight:700;color:#fff;text-shadow:0 1px 3px #000}
 </style>
 </head>
 <body>
@@ -614,14 +616,15 @@ async function guest(id) {
   const sr = await sb.rpc('guest_status', { eid: id, gid });
   const s0 = (sr.data && sr.data[0]) || { used: 0, guest_full: false };
   let used = s0.used, full = s0.guest_full, limit = e.shots_per_guest || 5;
-  let name = localStorage.getItem('sr_name') || '';
+  let name = localStorage.getItem('sr_name') || '', pending = 0;
+  window.onbeforeunload = ev => { if (pending) { ev.preventDefault(); ev.returnValue = ''; } };
   const mine = [];
   app.innerHTML = hdr() + `<div class="gh"><span class="gb">Kamera sekali pakai</span><h1 class="gt">${esc(e.name)}</h1></div><div id="roll"></div><div id="st"></div><p id="ms"></p><div class="ths" id="th"></div>`;
   const st = document.getElementById('st'), roll = document.getElementById('roll'), th = document.getElementById('th');
-  const ms = (t, ok) => { const m = document.getElementById('ms'); m.className = t && !ok ? 'err' : ''; m.textContent = t || ''; };
+  const ms = (t, ok) => { const m = document.getElementById('ms'); if (!m) return; m.className = t && !ok ? 'err' : ''; m.textContent = t || ''; };
   const left = () => Math.max(0, limit - used);
   const drawRoll = () => { roll.innerHTML = `<div class="shots" role="img" aria-label="${used} dari ${limit} bidikan terpakai">${Array.from({ length: limit }, (_, i) => `<i class="${i < used ? 'u' : ''}"></i>`).join('')}</div><p class="lf"><b>${left()}</b> bidikan tersisa</p>`; };
-  const drawTh = () => { th.innerHTML = mine.map((m, i) => `<button class="thb" data-i="${i}" aria-label="Lihat fotomu"><img src="${m.url}" alt="Fotomu"></button>`).join(''); th.querySelectorAll('.thb').forEach(b => b.onclick = () => viewer(mine, Number(b.dataset.i))); };
+  const drawTh = () => { th.innerHTML = mine.map((m, i) => `<button class="thb${m.pend ? ' pend' : ''}" data-i="${i}" aria-label="Lihat fotomu"><img src="${m.url}" alt="Fotomu"></button>`).join(''); th.querySelectorAll('.thb').forEach(b => b.onclick = () => viewer(mine, Number(b.dataset.i))); };
   const intro = () => {
     drawRoll();
     if (full) { st.innerHTML = '<div class="card"><h2>Kuota tamu penuh</h2><p>Album ini sudah mencapai batas jumlah tamu. Terima kasih sudah mampir!</p></div>'; return; }
@@ -636,7 +639,7 @@ async function guest(id) {
 
   const review = im => {
     ms('');
-    const k = Math.min(1, 2400 / Math.max(im.naturalWidth, im.naturalHeight));
+    const k = Math.min(1, 1800 / Math.max(im.naturalWidth, im.naturalHeight));
     const base = document.createElement('canvas'); base.width = Math.round(im.naturalWidth * k); base.height = Math.round(im.naturalHeight * k);
     base.getContext('2d').drawImage(im, 0, 0, base.width, base.height);
     const pv = document.createElement('canvas'), out = document.createElement('canvas');
@@ -659,17 +662,29 @@ async function guest(id) {
       const img = new Image(); img.src = base.toDataURL('image/jpeg', .8); img.alt = 'Hasil fotomu'; img.style.cssText = 'display:block;width:100%;height:auto'; cm.prepend(img);
     }
     document.getElementById('rt').onclick = intro;
-    document.getElementById('sd').onclick = async () => {
-      const b = document.getElementById('sd'); b.disabled = true; b.textContent = 'Mengirim…';
-      const blob = await new Promise(r => { if (gl2) { rOut(base, base.width, base.height, curF); out.toBlob(r, 'image/jpeg', .92); } else base.toBlob(r, 'image/jpeg', .92); });
-      const path = id + '/' + crypto.randomUUID() + '.jpg';
-      const up = await sb.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg' });
-      if (up.error) { ms('Gagal mengunggah. Coba lagi.'); b.disabled = false; b.textContent = 'Kirim foto'; return; }
-      const ins = await sb.from('photos').insert({ event_id: id, guest_name: name || 'Tamu', guest_id: gid, path });
-      if (ins.error) { const q = await sb.rpc('guest_status', { eid: id, gid }); if (q.data && q.data[0]) { used = q.data[0].used; full = q.data[0].guest_full; } intro(); ms('Foto tidak bisa dikirim: jatah foto atau kuota tamu sudah habis, atau acara sudah ditutup.'); return; }
-      used++; mine.unshift({ url: URL.createObjectURL(blob), name: name || 'Tamu' }); drawTh();
-      confetti(); if (navigator.vibrate) navigator.vibrate(40);
-      intro(); ms(left() ? 'Terkirim! Masih ada ' + left() + ' bidikan.' : 'Terkirim! Itu bidikan terakhirmu.', true);
+    document.getElementById('sd').onclick = () => {
+      const b = document.getElementById('sd'); b.disabled = true; b.textContent = 'Menyiapkan…';
+      const nm = name || 'Tamu';
+      const send = async blob => {
+        const item = { url: URL.createObjectURL(blob), name: nm, pend: true };
+        mine.unshift(item); used++; pending++; drawTh(); intro();
+        ms('Fotomu dikirim di latar belakang. Kamu bisa lanjut memotret, tapi jangan tutup halaman ini.', true);
+        const path = id + '/' + crypto.randomUUID() + '.jpg';
+        const up = await sb.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg' });
+        let err = up.error;
+        if (!err) { const ins = await sb.from('photos').insert({ event_id: id, guest_name: nm, guest_id: gid, path }); err = ins.error; }
+        pending--;
+        if (err) {
+          mine.splice(mine.indexOf(item), 1); drawTh();
+          const q = await sb.rpc('guest_status', { eid: id, gid });
+          if (q.data && q.data[0]) { used = q.data[0].used; full = q.data[0].guest_full; } else used = Math.max(0, used - 1);
+          drawRoll(); ms('Satu foto gagal terkirim. Jatah fotomu dikembalikan, silakan ambil lagi.');
+          return;
+        }
+        item.pend = false; drawTh(); confetti(); if (navigator.vibrate) navigator.vibrate(40);
+        ms(pending ? 'Masih mengirim ' + pending + ' foto…' : (left() ? 'Terkirim! Masih ada ' + left() + ' bidikan.' : 'Terkirim! Itu bidikan terakhirmu.'), true);
+      };
+      if (gl2) { rOut(base, base.width, base.height, curF); out.toBlob(send, 'image/jpeg', .85); } else base.toBlob(send, 'image/jpeg', .85);
     };
   };
   intro();
