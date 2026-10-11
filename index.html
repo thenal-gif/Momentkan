@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Momentkan – Kamera tamu lewat QR</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
@@ -177,6 +177,29 @@ details p{margin:8px 0 0}
 .cf{position:fixed;top:-14px;width:9px;height:14px;z-index:70;pointer-events:none;animation:cfa 1.7s ease-in forwards}
 @keyframes cfa{to{transform:translateY(108vh) rotate(720deg);opacity:.9}}
 @media(prefers-reduced-motion:reduce){.cf{display:none}.gt,.shots i.u,.ths img{animation:none}}
+
+.wall{column-gap:10px}
+.pol{position:relative;margin:0 0 10px;background:#000;padding:0;border-radius:14px;overflow:hidden;box-shadow:none;transform:none}
+.pol:hover{transform:none}
+.wall .pimg{border-radius:0}
+.pol .nm{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;font:700 .9rem 'Plus Jakarta Sans',sans-serif;pointer-events:none}
+.pol .pa{position:absolute;top:8px;right:8px}
+.pol .pa a,.pol .pa button{background:rgba(0,0,0,.5);color:#fff;border:0;width:30px;height:30px}
+.lb img{border:0;border-radius:10px}
+.lb .cap{font:700 1.1rem 'Plus Jakarta Sans',sans-serif}
+.cam{aspect-ratio:auto;border-radius:18px}
+.cam canvas{display:block;width:100%;height:auto}
+.cam .fn{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.55);color:#fff;font-weight:700;font-size:.8rem;padding:4px 12px;border-radius:999px;transition:opacity .4s}
+.cam .tl{position:absolute;top:10px;right:10px;display:flex;gap:8px}
+.cam .rb{width:38px;height:38px;padding:0;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:1.05rem}
+.fstrip{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 4px;scrollbar-width:none}
+.fstrip::-webkit-scrollbar{display:none}
+.fstrip .chip{flex:none}
+.shrow{display:flex;justify-content:center;margin:6px 0}
+.shutter:disabled{opacity:.4}
+.ths .thb{padding:0;background:none;border-radius:10px;flex:none;overflow:hidden;cursor:zoom-in}
+.ths img{border:0;transform:none;border-radius:10px;height:92px;display:block}
+.phone .tile{filter:var(--ft,none)}
 </style>
 </head>
 <body>
@@ -191,7 +214,82 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = document.getElementById('app');
 const PLANS = { basic: { name: 'Basic', guests: 20, shots: 5, price: 79889 }, pro: { name: 'Pro', guests: 100, shots: 10, price: 199889 }, unlimited: { name: 'Unlimited', guests: null, shots: 20, price: 299899 } };
 const rp = n => 'Rp' + n.toLocaleString('id-ID');
-const FILTERS = { original: 'Original', kodak: 'Kodak hangat', fuji: 'Fuji sejuk', bw: 'Hitam putih' };
+const FILTERS = { original: 'Original', disposable: 'Disposable', vintage: 'Vintage', filmgrain: 'Film Grain', warm: 'Warm', soft: 'Soft', bw: 'Black & White', wedding: 'Wedding Glow', champagne: 'Champagne', birthday: 'Birthday Pop', flashnight: 'Flash Night', nostalgia: 'Nostalgia' };
+/* Parameter filter: gain=pengali warna, add=angkat hitam/tint, shT/hiT=warna bayangan/highlight, con=kontras, sat=saturasi,
+   bri=terang, bw=hitam putih, sep=sepia, grain=butiran, vig=vignette, blur=glow lembut, bloom=cahaya highlight, flash=efek blitz */
+const FX = {
+  original: {},
+  disposable: { gain: [1.07, 1.03, .9], con: 1.18, sat: 1.28, bri: 1.02, grain: .09, vig: .38, flash: .3 },
+  vintage: { gain: [1.06, 1, .88], add: [.045, .03, .005], con: .9, sat: .78, sep: .3, grain: .06, vig: .3, shT: [0, .015, 0] },
+  filmgrain: { gain: [1.02, 1, .98], con: 1.1, sat: .92, grain: .2, vig: .15 },
+  warm: { gain: [1.14, 1, .84], con: 1.04, sat: 1.1, bri: 1.03, hiT: [.03, .015, 0] },
+  soft: { blur: .55, bloom: .25, con: .9, bri: 1.06, sat: .95, add: [.03, .025, .03] },
+  bw: { bw: 1, con: 1.28, grain: .07, vig: .22 },
+  wedding: { blur: .45, bloom: .4, con: .92, bri: 1.08, sat: 1.05, gain: [1.05, 1, .98], hiT: [.05, .025, .015], add: [.025, .015, .015], vig: .1 },
+  champagne: { gain: [1.1, 1.04, .86], sat: .82, con: 1.06, bri: 1.03, shT: [.025, .018, 0], hiT: [.05, .035, 0], bloom: .18 },
+  birthday: { sat: 1.6, con: 1.16, bri: 1.05, gain: [1.04, 1, 1.05], vig: .12, bloom: .1 },
+  flashnight: { con: 1.32, bri: .96, sat: 1.1, flash: .6, vig: .55, grain: .1, shT: [-.02, 0, .045], gain: [1, 1, 1.04] },
+  nostalgia: { sat: .74, con: .94, sep: .15, add: [.045, .03, .02], shT: [-.012, .022, .035], hiT: [.05, .022, -.02], grain: .1, vig: .3, bloom: .1, gain: [1.04, 1, .94] }
+};
+const CFX = { original: 'none', disposable: 'contrast(1.18) saturate(1.3) sepia(.08)', vintage: 'sepia(.35) contrast(.9) saturate(.8) brightness(1.05)', filmgrain: 'contrast(1.1) saturate(.9)', warm: 'sepia(.25) saturate(1.2) brightness(1.04) hue-rotate(-8deg)', soft: 'contrast(.9) brightness(1.08) saturate(.95) blur(.4px)', bw: 'grayscale(1) contrast(1.25)', wedding: 'brightness(1.1) contrast(.92) saturate(1.05) sepia(.12)', champagne: 'sepia(.3) saturate(.85) brightness(1.04) hue-rotate(-5deg)', birthday: 'saturate(1.7) contrast(1.15) brightness(1.05)', flashnight: 'contrast(1.35) brightness(.95) saturate(1.1)', nostalgia: 'sepia(.25) saturate(.75) contrast(.95) hue-rotate(-8deg)' };
+const VS = 'attribute vec2 p;varying vec2 v;void main(){v=p*.5+.5;gl_Position=vec4(p,0.,1.);}';
+const FS = `precision highp float;varying vec2 v;uniform sampler2D t;
+uniform vec3 gain,add,shT,hiT;uniform float con,sat,bri,bw,sep,grain,vig,blur,bloom,flash,seed,gs;
+float rnd(vec2 q){return fract(sin(dot(q,vec2(12.9898,78.233))+seed)*43758.5453);}
+void main(){
+  vec3 col=texture2D(t,v).rgb;
+  if(blur>0.||bloom>0.){
+    vec3 s=col;
+    for(int i=0;i<8;i++){float a=float(i)*.785398;vec2 d=vec2(cos(a),sin(a));
+      s+=texture2D(t,v+d*.008).rgb+texture2D(t,v+d*.018).rgb;}
+    s/=17.;
+    col=mix(col,s,blur);
+    col+=bloom*max(s-.55,0.)*1.6;
+  }
+  col=col*gain+add;
+  float l=dot(col,vec3(.299,.587,.114));
+  col=mix(vec3(l),col,sat);
+  col=mix(col,vec3(l),bw);
+  vec3 sp=vec3(dot(col,vec3(.393,.769,.189)),dot(col,vec3(.349,.686,.168)),dot(col,vec3(.272,.534,.131)));
+  col=mix(col,sp,sep);
+  l=dot(col,vec3(.299,.587,.114));
+  col+=shT*(1.-l)+hiT*l;
+  col=(col-.5)*con+.5;
+  col*=bri;
+  vec2 dd=v-.5;float r=length(dd);
+  col*=1.+flash*(1.-smoothstep(0.,.55,r)-.4);
+  col*=1.-vig*smoothstep(.3,.8,r);
+  col+=(rnd(floor(gl_FragCoord.xy/gs))-.5)*grain;
+  gl_FragColor=vec4(clamp(col,0.,1.),1.);
+}`;
+/* Satu renderer = satu tampilan: dipakai untuk pratinjau langsung DAN hasil akhir, jadi filter selalu sama. */
+function mkGL(cv) {
+  const gl = cv.getContext('webgl', { preserveDrawingBuffer: true, antialias: false }) || cv.getContext('experimental-webgl');
+  if (!gl) return null;
+  const mk = (t, src) => { const o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+  const pr = gl.createProgram();
+  gl.attachShader(pr, mk(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, mk(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR));
+  [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE));
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  const U = n => gl.getUniformLocation(pr, n);
+  const D = { gain: [1, 1, 1], add: [0, 0, 0], shT: [0, 0, 0], hiT: [0, 0, 0], con: 1, sat: 1, bri: 1, bw: 0, sep: 0, grain: 0, vig: 0, blur: 0, bloom: 0, flash: 0 };
+  return (src, w, h, f) => {
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    gl.viewport(0, 0, w, h);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+    const P = Object.assign({}, D, FX[f] || {});
+    for (const k in P) { const v = P[k]; Array.isArray(v) ? gl.uniform3fv(U(k), v) : gl.uniform1f(U(k), v); }
+    gl.uniform1f(U('seed'), Math.random() * 100); gl.uniform1f(U('gs'), Math.max(1, w / 720));
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  };
+}
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = t => new Date(t).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 const revealed = e => !e.reveal_at || new Date(e.reveal_at) <= new Date();
@@ -304,10 +402,8 @@ function landing(session){
         <div class="cols"><div class="col a">${col([0,1,2,3,4,5,6,7])}</div><div class="col b">${col([4,7,1,5,2,6,3,0])}</div></div>
         <div class="toast" id="ts"></div>
       </div></div>
-      <div class="chips" role="group" aria-label="Pilih gaya film">
-        <button class="chip ghost on" data-f="original">Original</button><button class="chip ghost" data-f="kodak">Kodak hangat</button><button class="chip ghost" data-f="fuji">Fuji sejuk</button><button class="chip ghost" data-f="bw">Hitam putih</button>
-      </div>
-      <p class="mini">Coba ganti gaya film — tampilan album ikut berubah.</p>
+      <div class="chips" role="group" aria-label="Pilih filter" style="flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;width:100%">${Object.entries(FILTERS).map(([k,v])=>`<button class="chip ghost${k==='original'?' on':''}" data-f="${k}" style="flex:none">${v}</button>`).join('')}</div>
+      <p class="mini">Coba ganti filter. Seperti inilah tamu memilihnya langsung di kamera.</p>
     </div>
   </section>
 
@@ -315,20 +411,20 @@ function landing(session){
     <div class="steps">
       <div class="step"><div class="n">1</div><h3>Pilih paket</h3><p>Pilih sesuai jumlah tamu, lalu buat album dan atur kapan foto boleh dilihat.</p></div>
       <div class="step"><div class="n">2</div><h3>Bagikan QR</h3><p>Cetak QR atau kirim link ke grup. Tempel di meja tamu.</p></div>
-      <div class="step"><div class="n">3</div><h3>Tamu memotret</h3><p>Scan, buka kamera HP, pilih filter dan bingkai, lalu kirim fotonya.</p></div>
+      <div class="step"><div class="n">3</div><h3>Tamu memotret</h3><p>Scan, buka kamera, pilih filter langsung saat membidik, lalu kirim.</p></div>
       <div class="step"><div class="n">4</div><h3>Buka albumnya</h3><p>Setelah acara, buka album dan unduh semua kenangan.</p></div>
     </div></section>
 
   <section class="sec rv"><h2>Kenapa Momentkan</h2>
     <div class="feat">
       <div><h3>Cukup scan QR</h3><p>Tamu cukup membuka kamera HP dan scan QR. Berfungsi di iPhone, Android, dan komputer.</p></div>
-      <div><h3>Filter dan bingkai pilihan tamu</h3><p>Setiap tamu bebas memilih filter dan bingkai polaroid sebelum mengirim foto.</p></div>
+      <div><h3>Filter langsung di kamera</h3><p>Ada 12 filter, dari Original sampai Wedding Glow, yang bisa dicoba tamu secara real time sebelum memotret.</p></div>
       <div><h3>Kejutan di akhir</h3><p>Foto terkunci sampai kamu membukanya, jadi semua orang melihat hasilnya bersamaan.</p></div>
     </div></section>
 
   <section class="sec rv" id="paket"><h2>Pilih paket acaramu</h2><p>Setiap tamu mendapat jatah bidikan seperti rol film sekali pakai.</p>
     <div class="plans">${Object.entries(PLANS).map(([k,p])=>`<div class="plan${k==='pro'?' hot':''}"><h3>${p.name}${k==='pro'?'<span class="tag">Rekomendasi</span>':''}</h3><div class="pr">${rp(p.price)}</div>
-      <ul><li><b${p.guests?'':' style="font-size:1.5rem;line-height:1"'}>${p.guests||'∞'}</b> tamu${p.guests?'':' (tanpa batas)'}</li><li><b>${p.shots}</b> foto per tamu</li><li>Galeri polaroid dan unduh foto</li><li>Foto terkunci sampai kamu buka</li></ul>
+      <ul><li><b${p.guests?'':' style="font-size:1.5rem;line-height:1"'}>${p.guests||'∞'}</b> tamu${p.guests?'':' (tanpa batas)'}</li><li><b>${p.shots}</b> foto per tamu</li><li>Galeri foto dan unduh semua foto</li><li>Foto terkunci sampai kamu buka</li></ul>
       <button class="full" data-plan="${k}">Pilih ${p.name}</button></div>`).join('')}</div></section>
 
   <section class="sec rv"><h2>Pertanyaan umum</h2>
@@ -344,7 +440,7 @@ function landing(session){
   app.querySelectorAll('[data-out]').forEach(b=>b.onclick=async()=>{await sb.auth.signOut();nav(location.pathname)});
   app.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>session?nav('?app=1&plan='+b.dataset.plan):openLogin(b.dataset.plan));
   const ph=app.querySelector('.phone');
-  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ph.dataset.f=c.dataset.f;app.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c))});
+  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ph.dataset.f=c.dataset.f;ph.style.setProperty('--ft',CFX[c.dataset.f]||'none');app.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c))});
   const names=['Rina','Bima','Sari','Eko','Maya','Tomi','Dina','Raka'];let n=128,k=0;
   clearInterval(window._tt);
   window._tt=setInterval(()=>{
@@ -473,8 +569,7 @@ async function dash(id) {
   <h2>Galeri</h2>
   ${!open ? `<p>Foto terkunci sampai ${fmt(e.reveal_at)} atau sampai kamu menekan "Buka sekarang".</p>` : ''}
   ${open && !photos.length ? '<div class="empty">Belum ada foto. Minta tamu scan QR di atas.</div>' : ''}
-  <div class="wall">${photos.map((p, i) => `<figure class="pol" style="--r:${(i % 2 ? 1 : -1) * (0.5 + (i % 3) * 0.4)}deg"><button class="pimg" data-open="${i}" aria-label="Lihat foto"><img loading="lazy" src="${purl(p.path)}" alt="Foto oleh ${esc(p.guest_name)}"></button>
-  <figcaption><span><b>${esc(p.guest_name || 'Tamu')}</b><small>${new Date(p.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</small></span><span class="pa"><a download href="${purl(p.path, 'momentkan-' + p.id.slice(0, 6) + '.jpg')}" aria-label="Unduh">↓</a><button data-del="${p.id}" aria-label="Hapus">✕</button></span></figcaption></figure>`).join('')}</div>`;
+  <div class="wall">${photos.map((p, i) => `<figure class="pol"><button class="pimg" data-open="${i}" aria-label="Lihat foto"><img loading="lazy" src="${purl(p.path)}" alt="Foto oleh ${esc(p.guest_name)}"></button><span class="nm">${esc(p.guest_name || 'Tamu')}</span><span class="pa"><a download href="${purl(p.path, 'momentkan-' + p.id.slice(0, 6) + '.jpg')}" aria-label="Unduh">↓</a><button data-del="${p.id}" aria-label="Hapus">✕</button></span></figure>`).join('')}</div>`;
   document.getElementById('cp').onclick = async () => { try { await navigator.clipboard.writeText(link); document.getElementById('cp').textContent = 'Tersalin ✓'; } catch (x) { prompt('Salin link:', link); } };
   const op = document.getElementById('op');
   if (op) op.onclick = async () => { await sb.from('events').update({ reveal_at: new Date().toISOString() }).eq('id', id); dash(id); };
@@ -484,26 +579,31 @@ async function dash(id) {
   app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => lightbox(photos, Number(b.dataset.open), async p => { if (await delPhoto(p)) { closeLb(); dash(id); } }));
 }
 
-function film(c, f) {
-  if (f === 'original') return;
-  const x = c.getContext('2d'), im = x.getImageData(0, 0, c.width, c.height), d = im.data, k = (v, s) => (v - 128) * s + 128;
-  for (let i = 0; i < d.length; i += 4) {
-    let r = d[i], g = d[i + 1], b = d[i + 2];
-    if (f === 'bw') { const l = .3 * r + .59 * g + .11 * b; r = g = b = k(l, 1.25); }
-    else if (f === 'fuji') { r = k(r * .95, 1.06); g = k(g * 1.06 + 3, 1.06); b = k(b * 1.08 + 4, 1.06); }
-    else { r = k(r * 1.1 + 10, 1.1); g = k(g * 1.02 + 3, 1.1); b = k(b * .85, 1.1); }
-    const n = (Math.random() - .5) * 30; d[i] = r + n; d[i + 1] = g + n; d[i + 2] = b + n;
-  }
-  x.putImageData(im, 0, 0);
-  const g = x.createRadialGradient(c.width / 2, c.height / 2, c.width * .35, c.width / 2, c.height / 2, c.width * .85);
-  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.5)'); x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
-}
 
 function confetti(){
   const cs=['#f4b400','#ef5b5b','#4fae7b','#5b8def','#f6f1e4','#e86f9a'];
   for(let i=0;i<36;i++){const d=document.createElement('span');d.className='cf';
     d.style.cssText=`left:${Math.random()*100}vw;background:${cs[i%cs.length]};animation-delay:${Math.random()*.4}s;border-radius:${i%3?'2px':'50%'}`;
     document.body.appendChild(d);setTimeout(()=>d.remove(),2400)}
+}
+
+function viewer(items,i){
+  let el=document.getElementById('lb');
+  if(!el){el=document.createElement('div');el.id='lb';el.className='lb';el.hidden=true;document.body.appendChild(el)}
+  const show=()=>{
+    const p=items[i];el.hidden=false;document.body.style.overflow='hidden';
+    el.innerHTML=`<button class="x" aria-label="Tutup">✕</button>${items.length>1?'<button class="nv" style="left:8px" data-d="-1" aria-label="Sebelumnya">‹</button><button class="nv" style="right:8px" data-d="1" aria-label="Berikutnya">›</button>':''}
+    <img src="${p.url}" alt="Fotomu"><div class="cap">${esc(p.name)}</div><div class="cnt">${i+1} / ${items.length}</div>
+    <div class="bar"><a class="btn sm" download="momentkan-${i+1}.jpg" href="${p.url}">Simpan ke HP</a></div>`;
+    el.querySelector('.x').onclick=closeLb;
+    el.querySelectorAll('.nv').forEach(b=>b.onclick=()=>go(Number(b.dataset.d)));
+  };
+  const go=d=>{i=(i+d+items.length)%items.length;show()};
+  el.onclick=ev=>{if(ev.target===el)closeLb()};
+  let sx=0;el.ontouchstart=ev=>{sx=ev.changedTouches[0].clientX};
+  el.ontouchend=ev=>{const dx=ev.changedTouches[0].clientX-sx;if(Math.abs(dx)>60&&items.length>1)go(dx<0?1:-1)};
+  document.onkeydown=ev=>{if(el.hidden)return;if(ev.key==='Escape')closeLb();if(ev.key==='ArrowLeft')go(-1);if(ev.key==='ArrowRight')go(1)};
+  show();
 }
 
 async function guest(id) {
@@ -515,66 +615,91 @@ async function guest(id) {
   const sr = await sb.rpc('guest_status', { eid: id, gid });
   const s0 = (sr.data && sr.data[0]) || { used: 0, guest_full: false };
   let used = s0.used, full = s0.guest_full, limit = e.shots_per_guest || 5;
-  let name = localStorage.getItem('sr_name') || '', curF = 'original', frame = 'polos', img = null;
+  let name = localStorage.getItem('sr_name') || '', curF = 'original', facing = 'environment', live = false, raf = 0, nat = false;
+  const mine = [];
   app.innerHTML = hdr() + `<div class="gh"><span class="gb">Kamera sekali pakai</span><h1 class="gt">${esc(e.name)}</h1></div><div id="roll"></div><div id="st"></div><p id="ms"></p><div class="ths" id="th"></div>`;
   const st = document.getElementById('st'), roll = document.getElementById('roll'), th = document.getElementById('th');
   const ms = (t, ok) => { const m = document.getElementById('ms'); m.className = t && !ok ? 'err' : ''; m.textContent = t || ''; };
   const left = () => Math.max(0, limit - used);
   const drawRoll = () => { roll.innerHTML = `<div class="shots" role="img" aria-label="${used} dari ${limit} bidikan terpakai">${Array.from({ length: limit }, (_, i) => `<i class="${i < used ? 'u' : ''}"></i>`).join('')}</div><p class="lf"><b>${left()}</b> bidikan tersisa</p>`; };
-  const build = (max, f, fr) => {
-    const w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
-    const pw = Math.round(w * k), ph = Math.round(h * k), p = document.createElement('canvas');
-    p.width = pw; p.height = ph; p.getContext('2d').drawImage(img, 0, 0, pw, ph); film(p, f);
-    if (fr !== 'polaroid') return p;
-    const m = Math.round(pw * .05), bt = Math.round(pw * .22), o = document.createElement('canvas');
-    o.width = pw + 2 * m; o.height = ph + m + bt;
-    const x = o.getContext('2d'); x.fillStyle = '#f6f1e4'; x.fillRect(0, 0, o.width, o.height); x.drawImage(p, m, m);
-    x.textAlign = 'center'; x.fillStyle = '#2a241a'; x.font = `600 ${Math.round(pw * .1)}px Caveat, cursive`; x.fillText(name || 'Tamu', o.width / 2, ph + m + bt * .55);
-    x.fillStyle = '#7a705c'; x.font = `${Math.round(pw * .034)}px 'Plus Jakarta Sans', sans-serif`;
-    x.fillText(e.name + ' · ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }), o.width / 2, ph + m + bt * .86);
-    return o;
-  };
-  const camBtn = () => {
-    drawRoll();
+  const drawTh = () => { th.innerHTML = mine.map((m, i) => `<button class="thb" data-i="${i}" aria-label="Lihat fotomu"><img src="${m.url}" alt="Fotomu"></button>`).join(''); th.querySelectorAll('.thb').forEach(b => b.onclick = () => viewer(mine, Number(b.dataset.i))); };
+  const stopCam = () => { live = false; cancelAnimationFrame(raf); stop(); };
+
+  const intro = () => {
+    stopCam(); drawRoll();
     if (full) { st.innerHTML = '<div class="card"><h2>Kuota tamu penuh</h2><p>Album ini sudah mencapai batas jumlah tamu. Terima kasih sudah mampir!</p></div>'; return; }
     if (!left()) { st.innerHTML = '<div class="card"><h2>Rolmu sudah habis</h2><p>Terima kasih sudah ikut mengabadikan momen ini. Foto akan terlihat setelah album dibuka.</p></div>'; return; }
-    st.innerHTML = `<label for="gn">Nama kamu</label><input id="gn" maxlength="30" value="${esc(name)}" placeholder="Tamu"><label class="btn full shut" for="fi">Ambil foto</label><input id="fi" type="file" accept="image/*" capture="environment" hidden><p class="hint">Setelah memotret, pilih filter dan bingkai, lalu kirim.</p>`;
-    document.getElementById('fi').onchange = ev => {
-      const f = ev.target.files[0]; if (!f) return;
-      name = document.getElementById('gn').value.trim(); localStorage.setItem('sr_name', name);
-      const im = new Image(); im.onload = () => { img = im; URL.revokeObjectURL(im.src); review(); }; im.src = URL.createObjectURL(f);
+    st.innerHTML = `<label for="gn">Nama kamu</label><input id="gn" maxlength="30" value="${esc(name)}" placeholder="Tamu"><button class="full shut" id="go">Buka kamera</button><p class="hint">Pilih dari 12 filter langsung saat membidik.</p>`;
+    document.getElementById('go').onclick = () => { name = document.getElementById('gn').value.trim(); localStorage.setItem('sr_name', name); openCam(); };
+  };
+
+  const native = () => {
+    stopCam(); curF = 'original'; nat = true;
+    st.innerHTML = `<div class="card"><p>Kamera langsung tidak bisa dibuka di perangkat ini, jadi filter live tidak tersedia. Kamu tetap bisa memotret dengan kamera HP.</p></div><label class="btn full shut" for="fi">Ambil foto</label><input id="fi" type="file" accept="image/*" capture="environment" hidden>`;
+    document.getElementById('fi').onchange = ev => { const f = ev.target.files[0]; if (f) review(f); };
+  };
+
+  const openCam = async () => {
+    stopCam(); ms('');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return native();
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: facing }, width: { ideal: 4096 }, height: { ideal: 3072 } }, audio: false }); } catch (x) { return native(); }
+    const vid = document.createElement('video'); vid.setAttribute('playsinline', ''); vid.muted = true; vid.autoplay = true; vid.srcObject = stream;
+    vid.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none';
+    try { await vid.play(); } catch (x) {}
+    const lv = document.createElement('canvas'), capCv = document.createElement('canvas');
+    const rLive = mkGL(lv), rCap = mkGL(capCv);
+    if (!rLive || !rCap) return native();
+    nat = false;
+    st.innerHTML = `<div class="cam" id="cm"><span class="fn" id="fn"></span><div class="tl"><button class="rb" id="fp" aria-label="Balik kamera">↻</button><button class="rb" id="cx" aria-label="Tutup kamera">✕</button></div></div>
+    <div class="fstrip" id="fs" role="group" aria-label="Pilih filter">${Object.entries(FILTERS).map(([k, v]) => `<button class="chip ghost${k === curF ? ' on' : ''}" data-f="${k}">${v}</button>`).join('')}</div>
+    <div class="shrow"><button class="shutter" id="sh" aria-label="Ambil foto"></button></div>`;
+    const cm = document.getElementById('cm'), fn = document.getElementById('fn');
+    cm.prepend(lv); cm.appendChild(vid);
+    const flash = () => { fn.textContent = FILTERS[curF]; fn.style.opacity = 1; clearTimeout(fn._t); fn._t = setTimeout(() => fn.style.opacity = 0, 1400); };
+    flash();
+    live = true;
+    const loop = () => {
+      if (!live) return;
+      if (!document.body.contains(lv)) { stopCam(); return; }
+      if (vid.readyState >= 2 && vid.videoWidth) rLive(vid, 720, Math.round(720 * vid.videoHeight / vid.videoWidth), curF);
+      raf = requestAnimationFrame(loop);
+    };
+    loop();
+    document.getElementById('fs').querySelectorAll('.chip').forEach(c => c.onclick = () => {
+      curF = c.dataset.f; document.querySelectorAll('#fs .chip').forEach(x => x.classList.toggle('on', x === c));
+      c.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); flash();
+    });
+    document.getElementById('cx').onclick = intro;
+    document.getElementById('fp').onclick = () => { facing = facing === 'environment' ? 'user' : 'environment'; openCam(); };
+    document.getElementById('sh').onclick = () => {
+      if (!vid.videoWidth || !left()) return;
+      const k = Math.min(1, 2400 / Math.max(vid.videoWidth, vid.videoHeight));
+      rCap(vid, Math.round(vid.videoWidth * k), Math.round(vid.videoHeight * k), curF);
+      cm.style.filter = 'brightness(2)'; setTimeout(() => cm.style.filter = '', 90);
+      capCv.toBlob(bl => { if (bl) { stopCam(); review(bl); } }, 'image/jpeg', .92);
     };
   };
-  const review = async () => {
+
+  const review = blob => {
     ms('');
-    try { await document.fonts.load('600 40px Caveat'); } catch (x) {}
-    const chips = (items, key, cur) => Object.entries(items).map(([k, v]) => `<button class="chip ghost${k === cur ? ' on' : ''}" data-${key}="${k}">${v}</button>`).join('');
-    st.innerHTML = `<canvas id="pv" style="width:100%;display:block;border-radius:6px;margin-top:6px;box-shadow:0 8px 24px rgba(0,0,0,.5)"></canvas>
-    <label>Filter</label><div class="chips" style="justify-content:flex-start" id="cf1">${chips(FILTERS, 'f', curF)}</div>
-    <label>Bingkai</label><div class="chips" style="justify-content:flex-start" id="cf2">${chips({ polos: 'Polos', polaroid: 'Polaroid' }, 'b', frame)}</div>
-    <div class="row" style="margin-top:18px"><button id="sd" style="flex:1">Kirim foto</button><button class="ghost" id="rt">Ulangi</button></div>`;
-    const draw = () => { const r = build(720, curF, frame), pv = document.getElementById('pv'); pv.width = r.width; pv.height = r.height; pv.getContext('2d').drawImage(r, 0, 0); };
-    draw();
-    st.querySelectorAll('[data-f]').forEach(c => c.onclick = () => { curF = c.dataset.f; st.querySelectorAll('[data-f]').forEach(x => x.classList.toggle('on', x === c)); draw(); });
-    st.querySelectorAll('[data-b]').forEach(c => c.onclick = () => { frame = c.dataset.b; st.querySelectorAll('[data-b]').forEach(x => x.classList.toggle('on', x === c)); draw(); });
-    document.getElementById('rt').onclick = () => { img = null; camBtn(); };
+    const url = URL.createObjectURL(blob);
+    st.innerHTML = `<div class="cam"><img src="${url}" alt="Hasil fotomu" style="display:block;width:100%;height:auto"><span class="fn">${esc(FILTERS[curF])}</span></div>
+    <p class="mini" style="text-align:center;margin-top:12px">Atas nama <b>${esc(name || 'Tamu')}</b></p>
+    <div class="row" style="margin-top:12px"><button id="sd" style="flex:1">Kirim foto</button><button class="ghost" id="rt">Ulangi</button></div>`;
+    document.getElementById('rt').onclick = () => { URL.revokeObjectURL(url); nat ? native() : openCam(); };
     document.getElementById('sd').onclick = async () => {
       const b = document.getElementById('sd'); b.disabled = true; b.textContent = 'Mengirim…';
-      const c = build(2000, curF, frame);
-      const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', .9));
       const path = id + '/' + crypto.randomUUID() + '.jpg';
       const up = await sb.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg' });
       if (up.error) { ms('Gagal mengunggah. Coba lagi.'); b.disabled = false; b.textContent = 'Kirim foto'; return; }
       const ins = await sb.from('photos').insert({ event_id: id, guest_name: name || 'Tamu', guest_id: gid, path });
-      if (ins.error) { ms('Foto tidak bisa dikirim: jatah foto atau kuota tamu sudah habis, atau acara sudah ditutup.'); const q = await sb.rpc('guest_status', { eid: id, gid }); if (q.data && q.data[0]) { used = q.data[0].used; full = q.data[0].guest_full; } camBtn(); return; }
-      used++;
-      const t = document.createElement('canvas'), k = 160 / c.height; t.width = Math.round(c.width * k); t.height = 160; t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
-      const ti = new Image(); ti.src = t.toDataURL('image/jpeg', .7); ti.alt = 'Fotomu'; th.prepend(ti);
+      if (ins.error) { ms('Foto tidak bisa dikirim: jatah foto atau kuota tamu sudah habis, atau acara sudah ditutup.'); const q = await sb.rpc('guest_status', { eid: id, gid }); if (q.data && q.data[0]) { used = q.data[0].used; full = q.data[0].guest_full; } intro(); return; }
+      used++; mine.unshift({ url, name: name || 'Tamu' }); drawTh();
       confetti(); if (navigator.vibrate) navigator.vibrate(40);
-      img = null; camBtn(); ms(left() ? 'Terkirim! Masih ada ' + left() + ' bidikan.' : 'Terkirim! Itu bidikan terakhirmu.', true);
+      if (left()) { nat ? native() : await openCam(); ms('Terkirim! Masih ada ' + left() + ' bidikan.', true); drawRoll(); } else { intro(); ms('Terkirim! Itu bidikan terakhirmu.', true); }
     };
   };
-  camBtn();
+  intro();
 }
 
 route();
