@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Momentkan – Kamera tamu lewat QR</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
@@ -100,6 +100,55 @@ details p{margin:8px 0 0}
 .rv.in{opacity:1;transform:none}
 .cta{max-width:460px;margin:0 auto}
 @media(prefers-reduced-motion:reduce){.track{animation:none}.rv{opacity:1;transform:none;transition:none}}
+
+.wall{columns:2;column-gap:14px;margin-top:14px}
+.pol{break-inside:avoid;margin:0 0 18px;background:#f6f1e4;padding:8px 8px 6px;border-radius:3px;box-shadow:0 6px 18px rgba(0,0,0,.45);transform:rotate(var(--r,0deg));transition:transform .25s}
+.pol:hover{transform:rotate(0) scale(1.02)}
+.wall .pimg{display:block;width:100%;padding:0;border-radius:2px;background:#222;cursor:zoom-in}
+.pol img{display:block;width:100%;height:auto}
+.pol figcaption{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:8px 2px 2px;color:#2a241a}
+.pol figcaption b{display:block;font:600 1.2rem 'Caveat',cursive;line-height:1.05}
+.pol small{font-size:.68rem;color:#7a705c}
+.pa{display:flex;gap:4px}
+.pa a,.pa button{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:.85rem;color:#2a241a;border:1px solid #cfc5ab;background:none;border-radius:50%;text-decoration:none;cursor:pointer}
+.lb{position:fixed;inset:0;z-index:50;background:rgba(10,8,6,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px calc(env(safe-area-inset-bottom,0px) + 12px)}
+.lb[hidden]{display:none}
+.lb img{max-width:100%;max-height:72vh;border:8px solid #f6f1e4;border-radius:3px;box-shadow:0 20px 60px #000;object-fit:contain}
+.lb .cap{margin:12px 0 2px;font:600 1.5rem 'Caveat',cursive;color:#f6f1e4;text-align:center}
+.lb .cnt{font-size:.8rem;color:var(--mut)}
+.lb .bar{display:flex;gap:10px;margin-top:12px}
+.lb .nv,.lb .x{position:absolute;padding:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:1.4rem;width:44px;height:44px}
+.lb .nv{top:50%;transform:translateY(-50%)}
+.lb .x{top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;font-size:1.1rem}
+.tix{display:flex;gap:14px;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#2a2412,#1f1c16);border:1px solid var(--line);border-radius:16px;padding:18px;margin:16px 0;position:relative;overflow:hidden}
+.tix::before,.tix::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:var(--bg);top:50%;margin-top:-9px}
+.tix::before{left:-9px}.tix::after{right:-9px}
+.tix small{color:var(--ac);font-weight:700;display:block;margin-bottom:4px}
+.tix b{display:block;font:800 1.35rem 'Plus Jakarta Sans';line-height:1.15;word-break:break-word}
+.tix span{display:block;font-size:.8rem;color:var(--mut);margin-top:4px}
+.tix-qr{background:#fff;padding:6px;border-radius:8px;flex:none}
+.tix-qr svg{display:block;width:72px;height:72px}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.opts .opt{display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:left;padding:10px;border-radius:12px;background:#100e0b;color:var(--tx);border:1px solid var(--line);font-weight:500;cursor:pointer}
+.opts .opt b{font-size:.88rem}
+.opts .opt span{font-size:.68rem;color:var(--mut);font-weight:400;line-height:1.3}
+.opts .opt.on{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac) inset;background:#2a2412}
+.sw{display:flex;align-items:center;gap:10px;color:var(--tx);font-size:.95rem;cursor:pointer;margin-top:18px}
+.sw input{position:absolute;opacity:0;width:0;padding:0;border:0}
+.tg{width:42px;height:24px;border-radius:999px;background:var(--line);position:relative;transition:background .2s;flex:none}
+.tg::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw input:checked+.tg{background:var(--ac)}
+.sw input:checked+.tg::after{transform:translateX(18px)}
+.sw input:focus-visible+.tg{outline:2px solid var(--ac);outline-offset:2px}
+.alb{display:flex;justify-content:space-between;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--ac);border-radius:14px;padding:14px 16px;margin:10px 0;text-decoration:none;color:var(--tx);transition:transform .2s}
+.alb:hover{transform:translateX(4px)}
+.alb b{display:block}
+.alb span{font-size:.8rem;color:var(--mut)}
+.alb-r{text-align:right;flex:none}
+.alb-r strong{font:800 1.5rem 'Plus Jakarta Sans';color:var(--ac);margin-right:4px}
+.alb-r small{color:var(--mut)}
+.alb-r .tag{display:block;margin-top:2px;font-style:normal}
+.tag.ok{color:var(--ok)}
 </style>
 </head>
 <body>
@@ -131,7 +180,36 @@ sb.auth.onAuthStateChange((ev, s) => {
   if (uid !== lastUid) { lastUid = uid; setTimeout(route, 0); }
 });
 
+
+function closeLb(){const el=document.getElementById('lb');if(el)el.hidden=true;document.body.style.overflow=''}
+function lightbox(list,i,onDel){
+  let el=document.getElementById('lb');
+  if(!el){el=document.createElement('div');el.id='lb';el.className='lb';el.hidden=true;document.body.appendChild(el)}
+  const show=()=>{
+    const p=list[i];
+    el.hidden=false;document.body.style.overflow='hidden';
+    el.innerHTML=`<button class="x" aria-label="Tutup">✕</button>
+    <button class="nv" style="left:8px" data-d="-1" aria-label="Sebelumnya">‹</button>
+    <button class="nv" style="right:8px" data-d="1" aria-label="Berikutnya">›</button>
+    <img src="${purl(p.path)}" alt="Foto oleh ${esc(p.guest_name)}">
+    <div class="cap">${esc(p.guest_name||'Tamu')}</div>
+    <div class="cnt">${fmt(p.created_at)} · ${i+1} / ${list.length}</div>
+    <div class="bar"><a class="btn sm" download href="${purl(p.path,'momentkan-'+p.id.slice(0,6)+'.jpg')}">Unduh</a><button class="sm ghost" data-del>Hapus</button></div>`;
+    el.querySelector('.x').onclick=closeLb;
+    el.querySelectorAll('.nv').forEach(b=>b.onclick=()=>go(Number(b.dataset.d)));
+    el.querySelector('[data-del]').onclick=()=>onDel(list[i]);
+  };
+  const go=d=>{i=(i+d+list.length)%list.length;show()};
+  el.onclick=ev=>{if(ev.target===el)closeLb()};
+  let sx=0;
+  el.ontouchstart=ev=>{sx=ev.changedTouches[0].clientX};
+  el.ontouchend=ev=>{const dx=ev.changedTouches[0].clientX-sx;if(Math.abs(dx)>60)go(dx<0?1:-1)};
+  document.onkeydown=ev=>{if(el.hidden)return;if(ev.key==='Escape')closeLb();if(ev.key==='ArrowLeft')go(-1);if(ev.key==='ArrowRight')go(1)};
+  show();
+}
+
 async function route() {
+  closeLb();
   stop(); app.classList.remove('wide');
   const p = new URLSearchParams(location.search);
   if (p.get('e')) return guest(p.get('e'));
@@ -247,22 +325,69 @@ async function owner() {
   }
   const { data } = await sb.from('events').select('*').eq('owner_id', session.user.id).order('created_at', { ascending: false });
   const list = data || [];
-  app.innerHTML = hdr() + `<form id="cf" class="card"><h2>Buat album acara</h2>
-  <label for="n">Nama acara</label><input id="n" required maxlength="60" placeholder="Pernikahan Dina &amp; Raka">
-  <label for="r">Foto dibuka untuk dilihat pada (opsional)</label><input id="r" type="datetime-local">
-  <label for="x">Kamera tamu ditutup pada (opsional)</label><input id="x" type="datetime-local">
-  <button class="full">Buat album</button></form>
-  <p>Masuk sebagai ${esc(session.user.email || '')}</p><div class="row spread"><h2>Album kamu</h2><button class="sm ghost" id="lo">Keluar</button></div>
-  ${list.length ? list.map(e => `<a class="card row spread" data-nav style="text-decoration:none;color:inherit" href="?d=${e.id}"><b>${esc(e.name)}</b></a>`).join('') : '<div class="empty">Belum ada album.</div>'}`;
+  const stats = await Promise.all(list.map(e => sb.rpc('event_stats', { eid: e.id })));
+  const cnt = i => (stats[i].data && stats[i].data[0]) ? Number(stats[i].data[0].photo_count) : 0;
+  let svg = '';
+  try { const q = qrcode(0, 'M'); q.addData(base()); q.make(); svg = q.createSvgTag(3, 0); } catch (x) {}
+  app.innerHTML = hdr() + `<h2>Buat album baru</h2><p>Isi detailnya, tiket albummu langsung terlihat di bawah.</p>
+  <div class="tix"><div><small>Album acara</small><b id="tn">Nama acaramu</b><span id="tr">Foto langsung terlihat</span><span id="te">Kamera tidak ditutup otomatis</span></div><div class="tix-qr" aria-hidden="true">${svg}</div></div>
+  <form id="cf" class="card">
+    <label for="n">Nama acara</label><input id="n" required maxlength="60" autocomplete="off" placeholder="Pernikahan Dina &amp; Raka">
+    <label>Kapan foto boleh dilihat?</label>
+    <div class="opts" id="ro">
+      <button type="button" class="opt on" data-m="now"><b>Langsung</b><span>Terlihat saat tamu memotret</span></button>
+      <button type="button" class="opt" data-m="tomorrow"><b>Besok pagi</b><span>Kejutan setelah acara</span></button>
+      <button type="button" class="opt" data-m="custom"><b>Atur sendiri</b><span>Pilih tanggal dan jam</span></button>
+    </div>
+    <input id="r" type="datetime-local" hidden style="margin-top:10px" aria-label="Waktu foto dibuka">
+    <label class="sw"><input type="checkbox" id="xe"><span class="tg"></span>Tutup kamera tamu otomatis</label>
+    <div id="xb" hidden>
+      <div class="chips" style="justify-content:flex-start;margin:10px 0"><button type="button" class="chip ghost" data-h="6">6 jam lagi</button><button type="button" class="chip ghost" data-h="12">12 jam lagi</button><button type="button" class="chip ghost" data-h="24">Besok</button></div>
+      <input id="x" type="datetime-local" aria-label="Waktu kamera ditutup">
+    </div>
+    <button class="full" id="sv">Buat album</button>
+  </form>
+  <div class="row spread" style="margin-top:28px"><h2>Album kamu</h2><button class="sm ghost" id="lo">Keluar</button></div>
+  <p>Masuk sebagai ${esc(session.user.email || '')}</p>
+  ${list.length ? list.map((e, i) => { const o = revealed(e); return `<a class="alb" data-nav href="?d=${e.id}"><div><b>${esc(e.name)}</b><span>Dibuat ${fmt(e.created_at)}</span></div><div class="alb-r"><strong>${cnt(i)}</strong><small>foto</small><i class="tag ${o ? 'ok' : ''}">${o ? 'Terbuka' : 'Terkunci'}</i></div></a>`; }).join('') : '<div class="empty">Belum ada album. Buat yang pertama di atas.</div>'}`;
   document.getElementById('lo').onclick = async () => { await sb.auth.signOut(); nav(location.pathname); };
-  document.getElementById('cf').onsubmit = async ev => {
+  const $ = i => document.getElementById(i);
+  const loc = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const tmr = () => { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(8, 0, 0, 0); return d; };
+  const fd = v => new Date(v).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+  let mode = 'now';
+  const revVal = () => mode === 'now' ? null : mode === 'tomorrow' ? loc(tmr()) : ($('r').value || null);
+  const upd = () => {
+    $('tn').textContent = $('n').value.trim() || 'Nama acaramu';
+    const rv = revVal();
+    $('tr').textContent = rv ? 'Foto terbuka ' + fd(rv) : 'Foto langsung terlihat';
+    $('te').textContent = $('xe').checked && $('x').value ? 'Kamera tutup ' + fd($('x').value) : 'Kamera tidak ditutup otomatis';
+  };
+  $('n').oninput = upd; $('r').oninput = upd; $('x').oninput = upd;
+  app.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    mode = b.dataset.m;
+    app.querySelectorAll('.opt').forEach(o => o.classList.toggle('on', o === b));
+    $('r').hidden = mode !== 'custom';
+    if (mode === 'custom' && !$('r').value) $('r').value = loc(tmr());
+    upd();
+  });
+  $('xe').onchange = () => {
+    $('xb').hidden = !$('xe').checked;
+    if ($('xe').checked && !$('x').value) $('x').value = loc(new Date(Date.now() + 12 * 3600e3));
+    upd();
+  };
+  app.querySelectorAll('[data-h]').forEach(b => b.onclick = () => { $('x').value = loc(new Date(Date.now() + Number(b.dataset.h) * 3600e3)); upd(); });
+  $('cf').onsubmit = async ev => {
     ev.preventDefault();
-    const r = document.getElementById('r').value, x = document.getElementById('x').value;
+    const rv = revVal();
+    if (mode === 'custom' && !rv) return alert('Pilih tanggal dan jam foto dibuka.');
+    $('sv').disabled = true; $('sv').textContent = 'Membuat album…';
     const { data: d, error } = await sb.from('events').insert({
-      name: document.getElementById('n').value.trim(),
-      reveal_at: r ? new Date(r).toISOString() : null, ends_at: x ? new Date(x).toISOString() : null
+      name: $('n').value.trim(),
+      reveal_at: rv ? new Date(rv).toISOString() : null,
+      ends_at: $('xe').checked && $('x').value ? new Date($('x').value).toISOString() : null
     }).select().single();
-    if (error) return alert(error.message);
+    if (error) { $('sv').disabled = false; $('sv').textContent = 'Buat album'; return alert(error.message); }
     nav('?d=' + d.id);
   };
 }
@@ -292,17 +417,15 @@ async function dash(id) {
   <h2>Galeri</h2>
   ${!open ? `<p>Foto terkunci sampai ${fmt(e.reveal_at)} atau sampai kamu menekan "Buka sekarang".</p>` : ''}
   ${open && !photos.length ? '<div class="empty">Belum ada foto. Minta tamu scan QR di atas.</div>' : ''}
-  <div class="grid">${photos.map(p => `<div class="ph"><img loading="lazy" src="${purl(p.path)}" alt="Foto oleh ${esc(p.guest_name)}">
-  <div class="acts"><a class="btn sm ghost" download href="${purl(p.path, 'momentkan-' + p.id.slice(0, 6) + '.jpg')}" aria-label="Unduh">↓</a><button class="sm ghost" data-del="${p.id}" aria-label="Hapus">✕</button></div></div>`).join('')}</div>`;
+  <div class="wall">${photos.map((p, i) => `<figure class="pol" style="--r:${(i % 2 ? 1 : -1) * (0.5 + (i % 3) * 0.4)}deg"><button class="pimg" data-open="${i}" aria-label="Lihat foto"><img loading="lazy" src="${purl(p.path)}" alt="Foto oleh ${esc(p.guest_name)}"></button>
+  <figcaption><span><b>${esc(p.guest_name || 'Tamu')}</b><small>${new Date(p.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</small></span><span class="pa"><a download href="${purl(p.path, 'momentkan-' + p.id.slice(0, 6) + '.jpg')}" aria-label="Unduh">↓</a><button data-del="${p.id}" aria-label="Hapus">✕</button></span></figcaption></figure>`).join('')}</div>`;
   document.getElementById('cp').onclick = async () => { try { await navigator.clipboard.writeText(link); document.getElementById('cp').textContent = 'Tersalin ✓'; } catch (x) { prompt('Salin link:', link); } };
   const op = document.getElementById('op');
   if (op) op.onclick = async () => { await sb.from('events').update({ reveal_at: new Date().toISOString() }).eq('id', id); dash(id); };
   const byId = pid => photos.find(p => p.id === pid);
-  app.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
-    if (!confirm('Hapus foto ini?')) return;
-    const p = byId(b.dataset.del);
-    await sb.storage.from('photos').remove([p.path]); await sb.from('photos').delete().eq('id', p.id); dash(id);
-  });
+  const delPhoto = async p => { if (!confirm('Hapus foto ini?')) return false; await sb.storage.from('photos').remove([p.path]); await sb.from('photos').delete().eq('id', p.id); return true; };
+  app.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { if (await delPhoto(byId(b.dataset.del))) dash(id); });
+  app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => lightbox(photos, Number(b.dataset.open), async p => { if (await delPhoto(p)) { closeLb(); dash(id); } }));
 }
 
 function film(c, f) {
