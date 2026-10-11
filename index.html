@@ -206,6 +206,8 @@ function landing(){
     <p id="lm"></p><button class="full">Kirim link masuk</button></form></div></section>`;
 
   const login=document.getElementById('login');
+  const er=new URLSearchParams(location.hash.slice(1)).get('error_description')||new URLSearchParams(location.search).get('error_description');
+  if(er){const m=document.getElementById('lm');m.className='err';m.textContent='Login gagal: '+er;history.replaceState({},'',location.pathname);setTimeout(()=>login.scrollIntoView(),300)}
   app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{login.scrollIntoView({behavior:'smooth'});setTimeout(()=>document.getElementById('em').focus({preventScroll:true}),500)});
   app.querySelectorAll('a[href="#how"]').forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById('how').scrollIntoView({behavior:'smooth'})});
   const ph=app.querySelector('.phone');
