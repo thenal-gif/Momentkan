@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
-:root{--bg:#15130f;--card:#1f1c16;--line:#3a352a;--tx:#f3ecdc;--mut:#a39a85;--ac:#f4b400;--ok:#4fae7b}
+:root{--bg:#f6f7ff;--card:#fff;--line:#e3e6f6;--tx:#1b1f3b;--mut:#646b92;--ac:#6a5cf6;--ok:#16a34a;--g:linear-gradient(135deg,#3b82f6,#8b5cf6)}
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 main{max-width:560px;margin:0 auto;padding:20px 16px 48px}
@@ -203,6 +203,51 @@ details p{margin:8px 0 0}
 .tile i{font-size:.62rem}
 .thb.pend{opacity:.55;position:relative}
 .thb.pend::after{content:"Mengirim…";position:absolute;left:0;right:0;bottom:4px;font-size:.62rem;font-weight:700;color:#fff;text-shadow:0 1px 3px #000}
+
+/* ===== tema fresh: putih, biru, ungu ===== */
+body{background:radial-gradient(900px 480px at 88% -8%,#e4e0ff 0,transparent 62%),radial-gradient(800px 460px at -8% 6%,#dbeafe 0,transparent 58%),var(--bg);background-attachment:fixed}
+.card{box-shadow:0 8px 28px rgba(79,92,200,.08)}
+input,select{background:#fff;color:var(--tx)}
+input:focus,select:focus{border-color:var(--ac);outline:none;box-shadow:0 0 0 3px rgba(106,92,246,.18)}
+button,.btn{background:var(--g);color:#fff;box-shadow:0 6px 18px rgba(99,102,241,.28)}
+.ghost,.lb button,.pol .pa a,.pol .pa button,.cam .rb{box-shadow:none}
+.chip.on{background:var(--g)!important;color:#fff!important;border-color:transparent!important}
+.opts .opt{background:#fff;box-shadow:none}
+.opts .opt.on{background:#eef1ff;border-color:var(--ac);box-shadow:0 0 0 1px var(--ac) inset}
+.sw input:checked+.tg{background:var(--g)}
+.shots i.u{background:var(--g);border-color:transparent}
+.err{color:#d93a3a}
+.grad{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo{color:var(--tx)}
+.sheet{background:rgba(27,31,59,.55)}
+.tix{background:var(--g);border:0;color:#fff;box-shadow:0 14px 34px rgba(99,102,241,.3)}
+.tix small{color:#e3e8ff}
+.tix span{color:rgba(255,255,255,.82)}
+.tix b{color:#fff}
+.phone{--tx:#f4f5ff;--mut:#a9aed0;--ac:#9db4ff;border:2px solid #2a2f55;box-shadow:0 30px 70px rgba(79,92,200,.35),0 0 0 6px #e9ebff}
+.screen{background:#101223}
+.pbar{background:linear-gradient(#101223 70%,transparent)}
+.toast{background:var(--g);color:#fff}
+.note{font-size:.85rem;color:var(--mut);background:#fff;border:1px dashed var(--line);border-radius:12px;padding:10px 14px;margin:14px 0}
+.ckl{list-style:none;padding:0;margin:12px 0}
+.ckl li{padding:5px 0 5px 26px;position:relative}
+.ckl li::before{content:'✓';position:absolute;left:0;color:var(--ac);font-weight:800}
+.sep{border-top:1px solid var(--line);margin:18px 0 14px}
+.plans{gap:18px}
+.plan{padding:24px;border-radius:24px;box-shadow:0 10px 30px rgba(79,92,200,.08)}
+.plan.hot{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac),0 14px 34px rgba(99,102,241,.2)}
+.ph2{display:flex;justify-content:space-between;align-items:center}
+.plan h3{font-size:1.8rem}
+.tg2{margin:4px 0 0}
+.pbox{background:#eef1ff;border:1.5px solid var(--ac);border-radius:16px;padding:16px 18px;margin:18px 0 16px}
+.pbox b{display:block;font:800 1.9rem 'Plus Jakarta Sans';color:var(--tx)}
+.pbox span{color:var(--mut);font-size:.9rem}
+.plan .sep{margin:20px 0 14px}
+.plan h4{margin:0 0 6px;font:700 .95rem 'Plus Jakarta Sans'}
+.plan ul{margin:0;flex:none}
+.plan li{border:0;padding:5px 0 5px 26px;position:relative;color:var(--tx)}
+.plan li::before{content:'✓';position:absolute;left:0;color:var(--ac);font-weight:800}
+.plan .pr{display:none}
 </style>
 </head>
 <body>
@@ -217,6 +262,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = document.getElementById('app');
 const PLANS = { basic: { name: 'Basic', guests: 20, shots: 5, price: 79889 }, pro: { name: 'Pro', guests: 100, shots: 10, price: 199889 }, unlimited: { name: 'Unlimited', guests: null, shots: 20, price: 299899 } };
 const rp = n => 'Rp' + n.toLocaleString('id-ID');
+const PF = {
+  basic: { tag: 'Untuk acara kecil', head: 'Termasuk:', items: ['Hingga 20 tamu', '5 foto per tamu', '12 pilihan filter', 'Galeri online dan unduh foto', 'Foto terkunci sampai kamu buka'] },
+  pro: { tag: 'Untuk acara keluarga dan teman', head: 'Semua fitur Basic, ditambah:', items: ['Hingga 100 tamu', '10 foto per tamu'] },
+  unlimited: { tag: 'Untuk acara besar tanpa batas', head: 'Semua fitur Pro, ditambah:', items: ['Tamu tanpa batas (∞)', '20 foto per tamu'] }
+};
 const FILTERS = { original: 'Original', disposable: 'Disposable', vintage: 'Vintage', filmgrain: 'Film Grain', warm: 'Warm', soft: 'Soft', bw: 'Black & White', wedding: 'Wedding Glow', champagne: 'Champagne', birthday: 'Birthday Pop', flashnight: 'Flash Night', nostalgia: 'Nostalgia' };
 /* Parameter filter: gain=pengali warna, add=angkat hitam/tint, shT/hiT=warna bayangan/highlight, con=kontras, sat=saturasi,
    bri=terang, bw=hitam putih, sep=sepia, grain=butiran, vig=vignette, blur=glow lembut, bloom=cahaya highlight, flash=efek blitz */
@@ -345,6 +395,11 @@ async function route() {
   const p = new URLSearchParams(location.search);
   if (p.get('e')) return guest(p.get('e'));
   if (p.get('d')) return dash(p.get('d'));
+  if ((p.get('app') || p.get('checkout')) && sessionStorage.getItem('sr_login')) {
+    await sb.auth.getSession(); sessionStorage.removeItem('sr_login');
+    const q = location.search; history.replaceState({}, '', location.pathname); history.pushState({}, '', q);
+  }
+  if (p.get('checkout')) return checkout(p.get('checkout'));
   if (p.get('app')) return owner();
   return home();
 }
@@ -364,17 +419,17 @@ const FK=Object.keys(FILTERS);
 const tile=(i,f)=>{const s=SC[i%8];return `<div class="tile" style="filter:${CFX[f]||'none'}"><svg viewBox="0 0 100 130" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s[0]}"/><stop offset="1" stop-color="${s[1]}"/></linearGradient></defs><rect width="100" height="130" fill="url(#g${i})"/>${s[2]()}</svg><i>${s[3]} · ${FILTERS[f]}</i></div>`};
 const col=(ids,off)=>{const h=ids.map((i,j)=>tile(i,FK[(j+off)%FK.length])).join('');return `<div class="track">${h}${h}</div>`};
 
-function openLogin(plan,errMsg){
+function openLogin(plan,errMsg,mode){
   const P=plan&&PLANS[plan];
   const old=document.getElementById('sheet');if(old)old.remove();
   const el=document.createElement('div');el.id='sheet';el.className='sheet';
-  el.innerHTML=`<div class="box" role="dialog" aria-modal="true" aria-label="Masuk"><div class="row spread"><h2>${P?'Lanjut dengan paket '+P.name:'Masuk'}</h2><button class="sm ghost" data-x aria-label="Tutup">✕</button></div>
-  <p>${P?P.name+' · '+(P.guests||'∞')+' tamu · '+P.shots+' foto per tamu · '+rp(P.price):'Masuk untuk membuat album.'}</p>
+  el.innerHTML=`<div class="box" role="dialog" aria-modal="true" aria-label="Masuk"><div class="row spread"><h2>${P?'Masuk dulu untuk lanjut ke pembayaran':mode==='signup'?'Buat akun Momentkan':'Masuk ke Momentkan'}</h2><button class="sm ghost" data-x aria-label="Tutup">✕</button></div>
+  <p>${P?'Paket '+P.name+' · '+rp(P.price)+'. Setelah masuk, kamu langsung diarahkan ke pembayaran.':'Pakai Google atau email. Akun dibuat otomatis kalau belum ada.'}</p>
   <button type="button" class="full ghost" id="gg" style="display:flex;align-items:center;justify-content:center;gap:10px"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.4 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.9 2.3-8.5 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Lanjutkan dengan Google</button>
   <p style="text-align:center;margin:12px 0 0">atau dengan email</p>
   <form id="lf"><label for="em">Email</label><input id="em" type="email" required placeholder="kamu@email.com"><p id="lm" class="${errMsg?'err':''}">${esc(errMsg||'')}</p><button class="full">Kirim link masuk</button></form></div>`;
   document.body.appendChild(el);
-  const dest=base()+'?app=1'+(P?'&plan='+plan:'');
+  const dest=base()+(P?'?checkout='+plan:'?app=1');
   el.onclick=e=>{if(e.target===el||e.target.hasAttribute('data-x'))el.remove()};
   document.getElementById('gg').onclick=async()=>{
     sessionStorage.setItem('sr_login','1');
@@ -392,10 +447,10 @@ function openLogin(plan,errMsg){
 function landing(session){
   app.classList.add('wide');
   app.innerHTML=`
-  <header class="nav"><a class="logo" data-nav href="${location.pathname}">✦ Momentkan</a>${session?'<span class="row" style="gap:8px"><button class="sm ghost" data-go>Dashboard</button><button class="sm ghost" data-out>Keluar</button></span>':''}</header>
+  <header class="nav"><a class="logo" data-nav href="${location.pathname}">✦ Momentkan</a>${session?'<span class="row" style="gap:8px"><button class="sm ghost" data-go>Dashboard</button><button class="sm ghost" data-out>Keluar</button></span>':'<span class="row" style="gap:8px"><button class="sm ghost" data-login>Masuk</button><button class="sm" data-signup>Daftar</button></span>'}</header>
   <section class="hero">
     <div>
-      <h1>Semua momen, dari semua sudut.</h1>
+      <h1>Semua momen, <span class="grad">dari semua sudut.</span></h1>
       <p class="lead">Momentkan mengubah HP setiap tamu menjadi kamera sekali pakai. Mereka scan QR, jepret, dan semua foto berkumpul di satu album milikmu.</p>
       <div class="row"><a class="btn" href="#paket" data-sc="paket">Lihat paket</a><a class="btn ghost" href="#how" data-sc="how">Lihat cara kerja</a></div>
       <p class="mini">Cocok untuk pernikahan, ulang tahun, reuni, sampai liburan bareng.</p>
@@ -412,7 +467,7 @@ function landing(session){
 
   <section class="sec rv" id="how"><h2>Dari satu hari jadi satu album</h2><p>Empat langkah, semuanya dari HP.</p>
     <div class="steps">
-      <div class="step"><div class="n">1</div><h3>Pilih paket</h3><p>Pilih sesuai jumlah tamu, lalu buat album dan atur kapan foto boleh dilihat.</p></div>
+      <div class="step"><div class="n">1</div><h3>Pilih paket</h3><p>Pilih sesuai jumlah tamu dan selesaikan pembayaran, lalu buat albumnya.</p></div>
       <div class="step"><div class="n">2</div><h3>Bagikan QR</h3><p>Cetak QR atau kirim link ke grup. Tempel di meja tamu.</p></div>
       <div class="step"><div class="n">3</div><h3>Tamu memotret</h3><p>Scan, ambil foto dengan kamera HP, pilih filter, lalu kirim.</p></div>
       <div class="step"><div class="n">4</div><h3>Buka albumnya</h3><p>Setelah acara, buka album dan unduh semua kenangan.</p></div>
@@ -425,10 +480,11 @@ function landing(session){
       <div><h3>Kejutan di akhir</h3><p>Foto terkunci sampai kamu membukanya, jadi semua orang melihat hasilnya bersamaan.</p></div>
     </div></section>
 
-  <section class="sec rv" id="paket"><h2>Pilih paket acaramu</h2><p>Setiap tamu mendapat jatah bidikan seperti rol film sekali pakai.</p>
-    <div class="plans">${Object.entries(PLANS).map(([k,p])=>`<div class="plan${k==='pro'?' hot':''}"><h3>${p.name}${k==='pro'?'<span class="tag">Rekomendasi</span>':''}</h3><div class="pr">${rp(p.price)}</div>
-      <ul><li><b${p.guests?'':' style="font-size:1.5rem;line-height:1"'}>${p.guests||'∞'}</b> tamu${p.guests?'':' (tanpa batas)'}</li><li><b>${p.shots}</b> foto per tamu</li><li>Galeri foto dan unduh semua foto</li><li>Foto terkunci sampai kamu buka</li></ul>
-      <button class="full" data-plan="${k}">Pilih ${p.name}</button></div>`).join('')}</div></section>
+  <section class="sec rv" id="paket"><h2>Pilih paket acaramu</h2><p>Satu paket untuk satu album. Setiap tamu mendapat jatah bidikan seperti rol film sekali pakai.</p>
+    <div class="plans">${Object.entries(PLANS).map(([k,p])=>`<div class="plan${k==='pro'?' hot':''}"><div class="ph2"><h3>${p.name}</h3>${k==='pro'?'<span class="tag">Rekomendasi</span>':''}</div><p class="tg2">${PF[k].tag}</p>
+      <div class="pbox"><b>${rp(p.price)}</b><span>${p.guests?p.guests+' tamu':'∞ tamu'} · ${p.shots} foto per tamu</span></div>
+      <button class="full" data-plan="${k}">Dapatkan paket ${p.name}</button>
+      <div class="sep"></div><h4>${PF[k].head}</h4><ul>${PF[k].items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('')}</div></section>
 
   <section class="sec rv"><h2>Pertanyaan umum</h2>
     <details><summary>Apakah tamu perlu install aplikasi?</summary><p>Tidak. Tamu cukup scan QR atau membuka link di browser HP mereka.</p></details>
@@ -440,8 +496,10 @@ function landing(session){
 
   app.querySelectorAll('[data-sc]').forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById(a.dataset.sc).scrollIntoView({behavior:'smooth'})});
   app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>nav('?app=1'));
+  app.querySelectorAll('[data-login]').forEach(b=>b.onclick=()=>openLogin(null,'','login'));
+  app.querySelectorAll('[data-signup]').forEach(b=>b.onclick=()=>openLogin(null,'','signup'));
   app.querySelectorAll('[data-out]').forEach(b=>b.onclick=async()=>{await sb.auth.signOut();nav(location.pathname)});
-  app.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>session?nav('?app=1&plan='+b.dataset.plan):openLogin(b.dataset.plan));
+  app.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>session?nav('?checkout='+b.dataset.plan):openLogin(b.dataset.plan));
   const names=['Rina','Bima','Sari','Eko','Maya','Tomi','Dina','Raka'];let n=128,k=0;
   clearInterval(window._tt);
   window._tt=setInterval(()=>{
@@ -449,6 +507,7 @@ function landing(session){
     n++;k++;document.getElementById('pc').textContent=n;
     ts.textContent='+1 foto dari '+names[k%names.length];ts.classList.add('on');setTimeout(()=>ts.classList.remove('on'),1800);
   },3200);
+  if(location.hash==='#paket')setTimeout(()=>{const t=document.getElementById('paket');if(t)t.scrollIntoView()},60);
   const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
   app.querySelectorAll('.rv').forEach(el=>io.observe(el));
   const er=new URLSearchParams(location.hash.slice(1)).get('error_description')||new URLSearchParams(location.search).get('error_description');
@@ -460,28 +519,48 @@ async function home() {
   return landing(session);
 }
 
+async function checkout(k) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!PLANS[k]) return nav(location.pathname);
+  if (!session) { landing(null); if (!document.getElementById('sheet')) openLogin(k); return; }
+  const p = PLANS[k];
+  app.innerHTML = hdr() + `<a data-nav href="${location.pathname}#paket">← Pilih paket lain</a>
+  <h2 style="margin-top:12px">Pembayaran</h2><p>Masuk sebagai ${esc(session.user.email || '')}</p>
+  <div class="card"><div class="ph2"><h3 style="margin:0;font-size:1.4rem">Paket ${p.name}</h3><span class="tag">1 album</span></div>
+    <ul class="ckl"><li>${p.guests ? 'Hingga ' + p.guests + ' tamu' : 'Tamu tanpa batas (∞)'}</li><li>${p.shots} foto per tamu</li><li>12 pilihan filter</li><li>Galeri online dan unduh foto</li></ul>
+    <div class="sep"></div><div class="row spread"><span>Total</span><b style="font-size:1.6rem">${rp(p.price)}</b></div></div>
+  <div class="card"><b>Metode pembayaran</b><p style="margin-bottom:0">QRIS, e-wallet, virtual account, atau kartu, dipilih di langkah pembayaran.</p></div>
+  <div class="note">Mode uji coba: pembayaran sungguhan belum tersambung. Tombol di bawah mengaktifkan paketmu tanpa biaya.</div>
+  <button class="full" id="pay">Bayar ${rp(p.price)}</button>`;
+  document.getElementById('pay').onclick = async () => {
+    const bt = document.getElementById('pay'), label = bt.textContent; bt.disabled = true; bt.textContent = 'Memproses…';
+    const fail = m => { bt.disabled = false; bt.textContent = label; alert(m); };
+    const c = await sb.rpc('create_order', { p: k });
+    if (c.error) return fail(c.error.message);
+    const d = await sb.rpc('demo_pay', { order_id: c.data });
+    if (d.error) return fail(d.error.message);
+    history.replaceState({}, '', '?app=1&paid=1'); route();
+  };
+}
+
 async function owner() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return landing(null);
-  const pq = new URLSearchParams(location.search).get('plan');
-  if (sessionStorage.getItem('sr_login')) {
-    sessionStorage.removeItem('sr_login');
-    history.replaceState({}, '', location.pathname);
-    history.pushState({}, '', '?app=1' + (pq ? '&plan=' + pq : ''));
-  }
-  const { data } = await sb.from('events').select('*').eq('owner_id', session.user.id).order('created_at', { ascending: false });
-  const list = data || [];
+  const [evR, orR] = await Promise.all([
+    sb.from('events').select('*').eq('owner_id', session.user.id).order('created_at', { ascending: false }),
+    sb.from('orders').select('*').eq('status', 'paid').eq('used', false).order('created_at', { ascending: true })
+  ]);
+  const list = evR.data || [], orders = orR.data || [];
   const stats = await Promise.all(list.map(e => sb.rpc('event_stats', { eid: e.id })));
   const cnt = i => (stats[i].data && stats[i].data[0]) ? Number(stats[i].data[0].photo_count) : 0;
-  let plan = PLANS[pq] ? pq : 'basic';
   let svg = '';
   try { const q = qrcode(0, 'M'); q.addData(base()); q.make(); svg = q.createSvgTag(3, 0); } catch (x) {}
-  app.innerHTML = hdr() + `<h2>Buat album baru</h2><p>Isi detailnya, tiket albummu langsung terlihat di bawah.</p>
-  <div class="tix"><div><small>Album acara</small><b id="tn">Nama acaramu</b><span id="tp"></span><span id="tr">Foto langsung terlihat</span><span id="te">Kamera tidak ditutup otomatis</span></div><div class="tix-qr" aria-hidden="true">${svg}</div></div>
+  let selO = orders[0] ? orders[0].id : null;
+  const paid = new URLSearchParams(location.search).get('paid');
+  const form = orders.length ? `<div class="tix"><div><small>Album acara</small><b id="tn">Nama acaramu</b><span id="tp"></span><span id="tr">Foto langsung terlihat</span><span id="te">Kamera tidak ditutup otomatis</span></div><div class="tix-qr" aria-hidden="true">${svg}</div></div>
   <form id="cf" class="card">
-    <label>Paket</label>
-    <div class="opts" id="po">${Object.entries(PLANS).map(([k, v]) => `<button type="button" class="opt${k === plan ? ' on' : ''}" data-p="${k}"><b>${v.name}</b><span>${v.guests || '∞'} tamu · ${v.shots} foto<br>${rp(v.price)}</span></button>`).join('')}</div>
-    <p class="mini">Pembayaran belum aktif: selama masa uji coba, paket dipakai tanpa bayar.</p>
+    <label>Paket yang dipakai</label>
+    <div class="opts" id="po">${orders.map(o => { const v = PLANS[o.plan]; return `<button type="button" class="opt${o.id === selO ? ' on' : ''}" data-o="${o.id}"><b>${v.name}</b><span>${v.guests || '∞'} tamu · ${v.shots} foto</span></button>`; }).join('')}</div>
     <label for="n">Nama acara</label><input id="n" required maxlength="60" autocomplete="off" placeholder="Pernikahan Dina &amp; Raka">
     <label>Kapan foto boleh dilihat?</label>
     <div class="opts" id="ro">
@@ -496,11 +575,14 @@ async function owner() {
       <input id="x" type="datetime-local" aria-label="Waktu kamera ditutup">
     </div>
     <button class="full" id="sv">Buat album</button>
-  </form>
+  </form>` : `<div class="card"><h3 style="margin:0 0 6px">Belum ada paket aktif</h3><p>Pilih dan bayar paket dulu untuk membuat album baru.</p><button class="full" id="gp">Pilih paket</button></div>`;
+  app.innerHTML = hdr() + `${paid ? '<div class="note" style="border-style:solid;color:var(--ok)">Pembayaran berhasil. Paketmu sudah aktif, buat albumnya di bawah.</div>' : ''}<h2>Buat album baru</h2>${orders.length ? '<p>Isi detailnya, tiket albummu langsung terlihat di bawah.</p>' : ''}
+  ${form}
   <div class="row spread" style="margin-top:28px"><h2>Album kamu</h2><button class="sm ghost" id="lo">Keluar</button></div>
   <p>Masuk sebagai ${esc(session.user.email || '')}</p>
-  ${list.length ? list.map((e, i) => { const o = revealed(e); return `<a class="alb" data-nav href="?d=${e.id}"><div><b>${esc(e.name)}</b><span>Dibuat ${fmt(e.created_at)}</span></div><div class="alb-r"><strong>${cnt(i)}</strong><small>foto</small><i class="tag ${o ? 'ok' : ''}">${o ? 'Terbuka' : 'Terkunci'}</i></div></a>`; }).join('') : '<div class="empty">Belum ada album. Buat yang pertama di atas.</div>'}`;
+  ${list.length ? list.map((e, i) => { const o = revealed(e); return `<a class="alb" data-nav href="?d=${e.id}"><div><b>${esc(e.name)}</b><span>Dibuat ${fmt(e.created_at)}</span></div><div class="alb-r"><strong>${cnt(i)}</strong><small>foto</small><i class="tag ${o ? 'ok' : ''}">${o ? 'Terbuka' : 'Terkunci'}</i></div></a>`; }).join('') : '<div class="empty">Belum ada album.</div>'}`;
   document.getElementById('lo').onclick = async () => { await sb.auth.signOut(); nav(location.pathname); };
+  if (!orders.length) { document.getElementById('gp').onclick = () => nav(location.pathname + '#paket'); return; }
   const $ = i => document.getElementById(i);
   const loc = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   const tmr = () => { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(8, 0, 0, 0); return d; };
@@ -509,13 +591,14 @@ async function owner() {
   const revVal = () => mode === 'now' ? null : mode === 'tomorrow' ? loc(tmr()) : ($('r').value || null);
   const upd = () => {
     $('tn').textContent = $('n').value.trim() || 'Nama acaramu';
-    const P = PLANS[plan]; $('tp').textContent = 'Paket ' + P.name + ' · ' + (P.guests || '∞') + ' tamu · ' + P.shots + ' foto/tamu · ' + rp(P.price);
+    const o = orders.find(x => x.id === selO), P = PLANS[o.plan];
+    $('tp').textContent = 'Paket ' + P.name + ' · ' + (P.guests || '∞') + ' tamu · ' + P.shots + ' foto/tamu';
     const rv = revVal();
     $('tr').textContent = rv ? 'Foto terbuka ' + fd(rv) : 'Foto langsung terlihat';
     $('te').textContent = $('xe').checked && $('x').value ? 'Kamera tutup ' + fd($('x').value) : 'Kamera tidak ditutup otomatis';
   };
   $('n').oninput = upd; $('r').oninput = upd; $('x').oninput = upd;
-  app.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { plan = b.dataset.p; app.querySelectorAll('[data-p]').forEach(o => o.classList.toggle('on', o === b)); upd(); });
+  app.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { selO = b.dataset.o; app.querySelectorAll('[data-o]').forEach(o => o.classList.toggle('on', o === b)); upd(); });
   upd();
   app.querySelectorAll('#ro .opt').forEach(b => b.onclick = () => {
     mode = b.dataset.m;
@@ -535,13 +618,14 @@ async function owner() {
     const rv = revVal();
     if (mode === 'custom' && !rv) return alert('Pilih tanggal dan jam foto dibuka.');
     $('sv').disabled = true; $('sv').textContent = 'Membuat album…';
-    const { data: d, error } = await sb.from('events').insert({
-      name: $('n').value.trim(), plan, max_guests: PLANS[plan].guests, shots_per_guest: PLANS[plan].shots,
-      reveal_at: rv ? new Date(rv).toISOString() : null,
-      ends_at: $('xe').checked && $('x').value ? new Date($('x').value).toISOString() : null
-    }).select().single();
+    const { data: eid, error } = await sb.rpc('create_event', {
+      ename: $('n').value.trim(),
+      rev: rv ? new Date(rv).toISOString() : null,
+      ends: $('xe').checked && $('x').value ? new Date($('x').value).toISOString() : null,
+      order_id: selO
+    });
     if (error) { $('sv').disabled = false; $('sv').textContent = 'Buat album'; return alert(error.message); }
-    nav('?d=' + d.id);
+    nav('?d=' + eid);
   };
 }
 
