@@ -248,6 +248,9 @@ button,.btn{background:var(--g);color:#fff;box-shadow:0 6px 18px rgba(99,102,241
 .plan li{border:0;padding:5px 0 5px 26px;position:relative;color:var(--tx)}
 .plan li::before{content:'✓';position:absolute;left:0;color:var(--ac);font-weight:800}
 .plan .pr{display:none}
+.oldp{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.oldp s{color:var(--mut);font-size:1rem}
+.tag.disc{background:#e8e4ff;color:#5b3fd6;border:0;font-weight:700}
 </style>
 </head>
 <body>
@@ -260,7 +263,7 @@ const SUPABASE_KEY = 'sb_publishable_DQ1iN34ZL4HJvjIojQHpPA_SE-Jezh1';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const app = document.getElementById('app');
-const PLANS = { basic: { name: 'Basic', guests: 20, shots: 5, price: 79889 }, pro: { name: 'Pro', guests: 100, shots: 10, price: 199889 }, unlimited: { name: 'Unlimited', guests: null, shots: 20, price: 299899 } };
+const PLANS = { basic: { name: 'Basic', guests: 20, shots: 5, price: 79900, old: 109000 }, pro: { name: 'Pro', guests: 100, shots: 10, price: 199900, old: 279000 }, unlimited: { name: 'Unlimited', guests: null, shots: 20, price: 399900, old: 599000 } };
 const rp = n => 'Rp' + n.toLocaleString('id-ID');
 const PF = {
   basic: { tag: 'Untuk acara kecil', head: 'Termasuk:', items: ['Hingga 20 tamu', '5 foto per tamu', '12 pilihan filter', 'Galeri online dan unduh foto', 'Foto terkunci sampai kamu buka'] },
@@ -346,6 +349,7 @@ function mkGL(cv) {
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = t => new Date(t).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 const revealed = e => !e.reveal_at || new Date(e.reveal_at) <= new Date();
+const thumbOf = p => p.replace(/\.jpg$/, '_t.jpg');
 const purl = (p, dl) => sb.storage.from('photos').getPublicUrl(p, dl ? { download: dl } : undefined).data.publicUrl;
 const base = () => location.origin + location.pathname;
 const hdr = () => '<a class="logo" data-nav href="' + location.pathname + '">✦ Momentkan</a>';
@@ -482,7 +486,7 @@ function landing(session){
 
   <section class="sec rv" id="paket"><h2>Pilih paket acaramu</h2><p>Satu paket untuk satu album. Setiap tamu mendapat jatah bidikan seperti rol film sekali pakai.</p>
     <div class="plans">${Object.entries(PLANS).map(([k,p])=>`<div class="plan${k==='pro'?' hot':''}"><div class="ph2"><h3>${p.name}</h3>${k==='pro'?'<span class="tag">Rekomendasi</span>':''}</div><p class="tg2">${PF[k].tag}</p>
-      <div class="pbox"><b>${rp(p.price)}</b><span>${p.guests?p.guests+' tamu':'∞ tamu'} · ${p.shots} foto per tamu</span></div>
+      <div class="pbox"><div class="oldp"><s>${rp(p.old)}</s><span class="tag disc">Hemat ${Math.round((1-p.price/p.old)*100)}%</span></div><b>${rp(p.price)}</b><span>${p.guests?p.guests+' tamu':'∞ tamu'} · ${p.shots} foto per tamu</span></div>
       <button class="full" data-plan="${k}">Dapatkan paket ${p.name}</button>
       <div class="sep"></div><h4>${PF[k].head}</h4><ul>${PF[k].items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('')}</div></section>
 
@@ -528,7 +532,7 @@ async function checkout(k) {
   <h2 style="margin-top:12px">Pembayaran</h2><p>Masuk sebagai ${esc(session.user.email || '')}</p>
   <div class="card"><div class="ph2"><h3 style="margin:0;font-size:1.4rem">Paket ${p.name}</h3><span class="tag">1 album</span></div>
     <ul class="ckl"><li>${p.guests ? 'Hingga ' + p.guests + ' tamu' : 'Tamu tanpa batas (∞)'}</li><li>${p.shots} foto per tamu</li><li>12 pilihan filter</li><li>Galeri online dan unduh foto</li></ul>
-    <div class="sep"></div><div class="row spread"><span>Total</span><b style="font-size:1.6rem">${rp(p.price)}</b></div></div>
+    <div class="sep"></div><div class="row spread"><span>Total</span><span><s style="color:var(--mut);font-size:.9rem;margin-right:8px">${rp(p.old)}</s><b style="font-size:1.6rem">${rp(p.price)}</b></span></div></div>
   <div class="card"><b>Metode pembayaran</b><p style="margin-bottom:0">QRIS, e-wallet, virtual account, atau kartu, dipilih di langkah pembayaran.</p></div>
   <div class="note">Mode uji coba: pembayaran sungguhan belum tersambung. Tombol di bawah mengaktifkan paketmu tanpa biaya.</div>
   <button class="full" id="pay">Bayar ${rp(p.price)}</button>`;
@@ -654,12 +658,12 @@ async function dash(id) {
   <h2>Galeri</h2>
   ${!open ? `<p>Foto terkunci sampai ${fmt(e.reveal_at)} atau sampai kamu menekan "Buka sekarang".</p>` : ''}
   ${open && !photos.length ? '<div class="empty">Belum ada foto. Minta tamu scan QR di atas.</div>' : ''}
-  <div class="wall">${photos.map((p, i) => `<figure class="pol"><button class="pimg" data-open="${i}" aria-label="Lihat foto"><img loading="lazy" src="${purl(p.path)}" alt="Foto oleh ${esc(p.guest_name)}"></button><span class="nm">${esc(p.guest_name || 'Tamu')}</span><span class="pa"><a download href="${purl(p.path, 'momentkan-' + p.id.slice(0, 6) + '.jpg')}" aria-label="Unduh">↓</a><button data-del="${p.id}" aria-label="Hapus">✕</button></span></figure>`).join('')}</div>`;
+  <div class="wall">${photos.map((p, i) => `<figure class="pol"><button class="pimg" data-open="${i}" aria-label="Lihat foto"><img loading="lazy" src="${purl(thumbOf(p.path))}" onerror="this.onerror=null;this.src='${purl(p.path)}'" alt="Foto oleh ${esc(p.guest_name)}"></button><span class="nm">${esc(p.guest_name || 'Tamu')}</span><span class="pa"><a download href="${purl(p.path, 'momentkan-' + p.id.slice(0, 6) + '.jpg')}" aria-label="Unduh">↓</a><button data-del="${p.id}" aria-label="Hapus">✕</button></span></figure>`).join('')}</div>`;
   document.getElementById('cp').onclick = async () => { try { await navigator.clipboard.writeText(link); document.getElementById('cp').textContent = 'Tersalin ✓'; } catch (x) { prompt('Salin link:', link); } };
   const op = document.getElementById('op');
   if (op) op.onclick = async () => { await sb.from('events').update({ reveal_at: new Date().toISOString() }).eq('id', id); dash(id); };
   const byId = pid => photos.find(p => p.id === pid);
-  const delPhoto = async p => { if (!confirm('Hapus foto ini?')) return false; await sb.storage.from('photos').remove([p.path]); await sb.from('photos').delete().eq('id', p.id); return true; };
+  const delPhoto = async p => { if (!confirm('Hapus foto ini?')) return false; await sb.storage.from('photos').remove([p.path, thumbOf(p.path)]); await sb.from('photos').delete().eq('id', p.id); return true; };
   app.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { if (await delPhoto(byId(b.dataset.del))) dash(id); });
   app.querySelectorAll('[data-open]').forEach(b => b.onclick = () => lightbox(photos, Number(b.dataset.open), async p => { if (await delPhoto(p)) { closeLb(); dash(id); } }));
 }
@@ -749,12 +753,13 @@ async function guest(id) {
     document.getElementById('sd').onclick = () => {
       const b = document.getElementById('sd'); b.disabled = true; b.textContent = 'Menyiapkan…';
       const nm = name || 'Tamu';
-      const send = async blob => {
+      const send = async (blob, thumb) => {
         const item = { url: URL.createObjectURL(blob), name: nm, pend: true };
         mine.unshift(item); used++; pending++; drawTh(); intro();
         ms('Fotomu dikirim di latar belakang. Kamu bisa lanjut memotret, tapi jangan tutup halaman ini.', true);
-        const path = id + '/' + crypto.randomUUID() + '.jpg';
-        const up = await sb.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg' });
+        const stem = id + '/' + crypto.randomUUID(), path = stem + '.jpg';
+        const opt = { contentType: 'image/jpeg', cacheControl: '31536000' };
+        const [up] = await Promise.all([sb.storage.from('photos').upload(path, blob, opt), thumb ? sb.storage.from('photos').upload(stem + '_t.jpg', thumb, opt) : null]);
         let err = up.error;
         if (!err) { const ins = await sb.from('photos').insert({ event_id: id, guest_name: nm, guest_id: gid, path }); err = ins.error; }
         pending--;
@@ -768,7 +773,14 @@ async function guest(id) {
         item.pend = false; drawTh(); confetti(); if (navigator.vibrate) navigator.vibrate(40);
         ms(pending ? 'Masih mengirim ' + pending + ' foto…' : (left() ? 'Terkirim! Masih ada ' + left() + ' bidikan.' : 'Terkirim! Itu bidikan terakhirmu.'), true);
       };
-      if (gl2) { rOut(base, base.width, base.height, curF); out.toBlob(send, 'image/jpeg', .85); } else base.toBlob(send, 'image/jpeg', .85);
+      const toB = (cv, q) => new Promise(r => cv.toBlob(r, 'image/jpeg', q));
+      (async () => {
+        const k = 480 / Math.max(base.width, base.height), tw = Math.round(base.width * k), th = Math.round(base.height * k);
+        let full, thumb;
+        if (gl2) { rOut(base, base.width, base.height, curF); full = await toB(out, .85); rOut(base, tw, th, curF); thumb = await toB(out, .8); }
+        else { full = await toB(base, .85); const t = document.createElement('canvas'); t.width = tw; t.height = th; t.getContext('2d').drawImage(base, 0, 0, tw, th); thumb = await toB(t, .8); }
+        send(full, thumb);
+      })();
     };
   };
   intro();
