@@ -315,6 +315,13 @@ button,.btn{background:var(--g);color:#fff;box-shadow:0 6px 18px rgba(99,102,241
   #pp{display:flex!important;width:210mm;height:297mm;align-items:center;justify-content:center;background:#fff}
   #pp .poster{transform:scale(1.2)}
 }
+
+.frames{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.fr{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:14px;background:#fff;color:var(--tx);border:2px solid var(--line);box-shadow:none;font-weight:500}
+.fr svg{height:96px;width:auto;max-width:100%}
+.fr b{font-size:.8rem}
+.fr span{font-size:.7rem;color:var(--mut)}
+button.fr.on{border-color:var(--ac);background:#eef1ff}
 </style>
 </head>
 <body>
@@ -331,9 +338,9 @@ const app = document.getElementById('app');
 const PLANS = { basic: { name: 'Basic', guests: 20, shots: 5, price: 79900, old: 109000 }, pro: { name: 'Pro', guests: 100, shots: 10, price: 199900, old: 299000 }, unlimited: { name: 'Unlimited', guests: null, shots: 20, price: 499900, old: 599000 } };
 const rp = n => 'Rp' + n.toLocaleString('id-ID');
 const PF = {
-  basic: { tag: 'Untuk acara kecil', head: 'Termasuk:', items: ['Hingga 20 tamu', '5 foto per tamu', '12 pilihan filter', 'Galeri online dan unduh foto', 'Album bisa dibagikan ke semua tamu'] },
-  pro: { tag: 'Untuk acara keluarga dan teman', head: 'Semua fitur Basic, ditambah:', items: ['Hingga 100 tamu', '10 foto per tamu'] },
-  unlimited: { tag: 'Untuk acara besar tanpa batas', head: 'Semua fitur Pro, ditambah:', items: ['Tamu tanpa batas (∞)', '20 foto per tamu'] }
+  basic: { tag: 'Untuk acara kecil', head: 'Termasuk:', items: ['Hingga 20 tamu', '5 foto/kolase per tamu', '12 pilihan filter', 'Galeri online dan unduh foto', 'Album bisa dibagikan ke semua tamu'] },
+  pro: { tag: 'Untuk acara keluarga dan teman', head: 'Semua fitur Basic, ditambah:', items: ['Hingga 100 tamu', '10 foto/kolase per tamu'] },
+  unlimited: { tag: 'Untuk acara besar tanpa batas', head: 'Semua fitur Pro, ditambah:', items: ['Tamu tanpa batas (∞)', '20 foto/kolase per tamu'] }
 };
 const FILTERS = { original: 'Original', disposable: 'Disposable', vintage: 'Vintage', filmgrain: 'Film Grain', warm: 'Warm', soft: 'Soft', bw: 'Black & White', wedding: 'Wedding Glow', champagne: 'Champagne', birthday: 'Birthday Pop', flashnight: 'Flash Night', nostalgia: 'Nostalgia' };
 /* Parameter filter: gain=pengali warna, add=angkat hitam/tint, shT/hiT=warna bayangan/highlight, con=kontras, sat=saturasi,
@@ -528,7 +535,7 @@ function landing(session){
   <section class="hero">
     <div>
       <h1>Semua momen, <span class="grad">dari semua sudut.</span></h1>
-      <p class="lead">Momentkan mengubah HP setiap tamu menjadi kamera sekali pakai. Mereka scan QR, jepret, dan semua foto berkumpul di satu album milikmu.</p>
+      <p class="lead">Momentkan mengubah HP setiap tamu menjadi photobooth. Mereka scan QR, pilih frame kolase, jepret, dan semua hasilnya berkumpul di satu album milikmu.</p>
       <div class="row"><a class="btn" href="#paket" data-sc="paket">Lihat paket</a><a class="btn ghost" href="#how" data-sc="how">Lihat cara kerja</a><a class="btn ghost" data-nav href="?demo=1">Coba demo</a></div>
       <p class="mini">Cocok untuk pernikahan, ulang tahun, reuni, sampai liburan bareng.</p>
     </div>
@@ -546,15 +553,15 @@ function landing(session){
     <div class="steps">
       <div class="step"><div class="n">1</div><h3>Pilih paket</h3><p>Pilih sesuai jumlah tamu dan selesaikan pembayaran, lalu buat albumnya.</p></div>
       <div class="step"><div class="n">2</div><h3>Bagikan QR</h3><p>Cetak QR atau kirim link ke grup. Tempel di meja tamu.</p></div>
-      <div class="step"><div class="n">3</div><h3>Tamu memotret</h3><p>Scan, ambil foto dengan kamera HP, pilih filter, lalu kirim.</p></div>
+      <div class="step"><div class="n">3</div><h3>Tamu memotret</h3><p>Scan, pilih frame kolase, ambil foto dengan kamera HP, pilih filter, lalu kirim.</p></div>
       <div class="step"><div class="n">4</div><h3>Bagikan albumnya</h3><p>Bagikan QR dan link album supaya semua tamu bisa melihat dan menyimpan foto.</p></div>
     </div></section>
 
   <section class="sec rv why"><h2>Kenapa Momentkan?</h2><b>Karena setiap momen layak untuk diabadikan.</b><p>Sering kali, momen terbaik justru tertangkap dari kamera orang lain. Dengan Momentkan, semua orang bisa ikut mengabadikan keseruan acara dan mengumpulkannya dalam satu album digital yang mudah diakses.</p></section>
 
-  <section class="sec rv" id="paket"><h2>Pilih paket acaramu</h2><p>Satu paket untuk satu album. Setiap tamu mendapat jatah bidikan seperti rol film sekali pakai.</p><p>Belum yakin? <a data-nav href="?demo=1">Coba demo</a> tanpa login dan tanpa bayar.</p>
+  <section class="sec rv" id="paket"><h2>Pilih paket acaramu</h2><p>Satu paket untuk satu album. Setiap tamu mendapat jatah foto atau kolase, seperti rol film sekali pakai.</p><p>Belum yakin? <a data-nav href="?demo=1">Coba demo</a> tanpa login dan tanpa bayar.</p>
     <div class="plans">${Object.entries(PLANS).map(([k,p])=>`<div class="plan${k==='pro'?' hot':''}"><div class="ph2"><h3>${p.name}</h3>${k==='pro'?'<span class="tag">Rekomendasi</span>':''}</div><p class="tg2">${PF[k].tag}</p>
-      <div class="pbox"><div class="oldp"><s>${rp(p.old)}</s><span class="tag disc">Hemat ${Math.round((1-p.price/p.old)*100)}%</span></div><b>${rp(p.price)}</b><span>${p.guests?p.guests+' tamu':'∞ tamu'} · ${p.shots} foto per tamu</span></div>
+      <div class="pbox"><div class="oldp"><s>${rp(p.old)}</s><span class="tag disc">Hemat ${Math.round((1-p.price/p.old)*100)}%</span></div><b>${rp(p.price)}</b><span>${p.guests?p.guests+' tamu':'∞ tamu'} · ${p.shots} foto/kolase per tamu</span></div>
       <button class="full" data-plan="${k}">Dapatkan paket ${p.name}</button>
       <div class="sep"></div><h4>${PF[k].head}</h4><ul>${PF[k].items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('')}</div></section>
 
@@ -599,7 +606,7 @@ async function checkout(k) {
   app.innerHTML = hdr() + `<a data-nav href="${location.pathname}#paket">← Pilih paket lain</a>
   <h2 style="margin-top:12px">Pembayaran</h2><p>Masuk sebagai ${esc(session.user.email || '')}</p>
   <div class="card"><div class="ph2"><h3 style="margin:0;font-size:1.4rem">Paket ${p.name}</h3><span class="tag">1 album</span></div>
-    <ul class="ckl"><li>${p.guests ? 'Hingga ' + p.guests + ' tamu' : 'Tamu tanpa batas (∞)'}</li><li>${p.shots} foto per tamu</li><li>12 pilihan filter</li><li>Galeri online dan unduh foto</li></ul>
+    <ul class="ckl"><li>${p.guests ? 'Hingga ' + p.guests + ' tamu' : 'Tamu tanpa batas (∞)'}</li><li>${p.shots} foto/kolase per tamu</li><li>12 pilihan filter</li><li>Galeri online dan unduh foto</li></ul>
     <div class="sep"></div><div class="row spread"><span>Total</span><span><s style="color:var(--mut);font-size:.9rem;margin-right:8px">${rp(p.old)}</s><b style="font-size:1.6rem">${rp(p.price)}</b></span></div></div>
   <div class="card"><b>Metode pembayaran</b><p style="margin-bottom:0">QRIS, e-wallet, virtual account, atau kartu, dipilih di langkah pembayaran.</p></div>
   <div class="note">Mode uji coba: pembayaran sungguhan belum tersambung. Tombol di bawah mengaktifkan paketmu tanpa biaya.</div>
@@ -705,6 +712,61 @@ async function owner() {
   };
 }
 
+/* ===== Photobooth: frame kolase ===== */
+const FRAMES = {
+  single: { n: 'Foto tunggal', c: 1 },
+  duo: { n: 'Duo', c: 2, s: 640, cols: 1 },
+  strip3: { n: 'Strip 3', c: 3, s: 560, cols: 1 },
+  strip4: { n: 'Strip 4', c: 4, s: 480, cols: 1 },
+  grid4: { n: 'Kolase 2×2', c: 4, s: 480, cols: 2 },
+  grid6: { n: 'Kolase 2×3', c: 6, s: 420, cols: 2 }
+};
+const COLS = { putih: ['Putih', '#ffffff', '#1b1f3b'], krem: ['Krem', '#f6efe2', '#3a2f20'], hitam: ['Hitam', '#111111', '#f5f5f5'], pink: ['Pink', '#fbd9e0', '#5a2a3a'], gradasi: ['Gradasi', 'grad', '#ffffff'] };
+const layoutOf = id => {
+  const f = FRAMES[id], m = 40, g = 24, cap = 170, s = f.s, cols = f.cols, rows = Math.ceil(f.c / cols);
+  const W = 2 * m + cols * s + (cols - 1) * g, H = m + rows * s + (rows - 1) * g + cap;
+  return { W, H, slots: Array.from({ length: f.c }, (_, i) => [m + (i % cols) * (s + g), m + Math.floor(i / cols) * (s + g), s, s]), cap: [0, H - cap, W, cap] };
+};
+const frameThumb = id => {
+  if (id === 'single') return '<svg viewBox="0 0 60 80" aria-hidden="true"><rect x="4" y="4" width="52" height="72" rx="4" fill="#c9d1ff"/></svg>';
+  const L = layoutOf(id);
+  return `<svg viewBox="0 0 ${L.W} ${L.H}" aria-hidden="true"><rect x="5" y="5" width="${L.W - 10}" height="${L.H - 10}" rx="24" fill="#fff" stroke="#c9ceea" stroke-width="10"/>${L.slots.map(([x, y, w, h]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#c9d1ff"/>`).join('')}<rect x="${L.W * .25}" y="${L.H - 100}" width="${L.W * .5}" height="24" rx="12" fill="#c9ceea"/></svg>`;
+};
+const slotAt = (cv, ev, L) => { const r = cv.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * L.W, py = (ev.clientY - r.top) / r.height * L.H; return L.slots.findIndex(([x, y, w, h]) => px >= x && px <= x + w && py >= y && py <= y + h); };
+const cover = (im, w, h) => {
+  const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h));
+  const iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height, r = Math.max(c.width / iw, c.height / ih), dw = iw * r, dh = ih * r;
+  c.getContext('2d').drawImage(im, (c.width - dw) / 2, (c.height - dh) / 2, dw, dh); return c;
+};
+const setFit = (x, text, weight, maxW, start) => { let px = start; const set = () => x.font = weight + ' ' + px + "px 'Plus Jakarta Sans', sans-serif"; set(); while (x.measureText(text).width > maxW && px > 14) { px -= 2; set(); } };
+/* o: { imgs, id, col, f, r:{fn,cv}|null, scale, guest, ev } -> canvas */
+const composeFrame = o => {
+  const { imgs, id, f, scale, r } = o;
+  const filt = (src, w, h) => { if (!r || f === 'original') return src; r.fn(src, w, h, f); return r.cv; };
+  if (id === 'single') {
+    const im = imgs[0], k = Math.min(1, 1800 / Math.max(im.width, im.height)) * scale, w = Math.max(1, Math.round(im.width * k)), h = Math.max(1, Math.round(im.height * k));
+    const t = document.createElement('canvas'); t.width = w; t.height = h; t.getContext('2d').drawImage(im, 0, 0, w, h);
+    const out = document.createElement('canvas'); out.width = w; out.height = h; out.getContext('2d').drawImage(filt(t, w, h), 0, 0); return out;
+  }
+  const L = layoutOf(id), bg = COLS[o.col][1], ink = COLS[o.col][2];
+  const cv = document.createElement('canvas'); cv.width = Math.round(L.W * scale); cv.height = Math.round(L.H * scale);
+  const x = cv.getContext('2d'); x.scale(scale, scale);
+  if (bg === 'grad') { const gr = x.createLinearGradient(0, 0, L.W, L.H); gr.addColorStop(0, '#3b82f6'); gr.addColorStop(1, '#8b5cf6'); x.fillStyle = gr; } else x.fillStyle = bg;
+  x.fillRect(0, 0, L.W, L.H);
+  L.slots.forEach(([sx, sy, sw, sh], i) => {
+    const im = imgs[i];
+    if (!im) { x.fillStyle = 'rgba(100,110,160,.2)'; x.fillRect(sx, sy, sw, sh); x.fillStyle = ink; x.globalAlpha = .6; x.font = "800 90px 'Plus Jakarta Sans', sans-serif"; x.textAlign = 'center'; x.fillText(String(i + 1), sx + sw / 2, sy + sh / 2 + 30); x.globalAlpha = 1; return; }
+    const w = Math.round(sw * scale), h = Math.round(sh * scale);
+    x.drawImage(filt(cover(im, w, h), w, h), sx, sy, sw, sh);
+  });
+  const cx = L.W / 2, cy = L.cap[1], mw = L.W - 80, d = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }), sub = (o.guest || 'Tamu') + ' · ' + d;
+  x.textAlign = 'center'; x.fillStyle = ink;
+  setFit(x, o.ev, 800, mw, 46); x.fillText(o.ev, cx, cy + 62);
+  setFit(x, sub, 600, mw, 28); x.globalAlpha = .85; x.fillText(sub, cx, cy + 108);
+  x.globalAlpha = .55; x.font = "700 22px 'Plus Jakarta Sans', sans-serif"; x.fillText('Momentkan', cx, cy + 146); x.globalAlpha = 1;
+  return cv;
+};
+
 /* ===== Template cetak QR ===== */
 const TPL = {
   floral: { n: 'Floral Romantis', f: 'Pernikahan, lamaran', bg: '#fbf3e6', ink: '#1b2245', acc: '#e8a9ae', card: '#ffffff', gold: '#c9a35f' },
@@ -735,7 +797,7 @@ const posterHTML = (id, name, qr, qt) => {
   const CAM = '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>';
   const IMG = '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M4 18l5-5 4 4 3-3 4 4"/>';
   const HRT = '<path d="M12 20s-7-4.4-9-9c-1.3-3 .6-6 3.6-6 1.8 0 3.3 1 4.1 2.4h.6C12.1 6 13.6 5 15.4 5 18.4 5 20.3 8 19 11c-2 4.600-7 9-7 9z"/>';
-  const steps = qt === 'cam' ? [[QRI, '1. Scan QR'], [CAM, '2. Ambil Foto'], [IMG, '3. Foto Terkumpul di Satu Album']] : [[QRI, '1. Scan QR'], [IMG, '2. Lihat Semua Foto'], [HRT, '3. Simpan Kenangan']];
+  const steps = qt === 'cam' ? [[QRI, '1. Scan QR'], [CAM, '2. Pilih Frame & Foto'], [IMG, '3. Hasil Terkumpul di Satu Album']] : [[QRI, '1. Scan QR'], [IMG, '2. Lihat Semua Foto'], [HRT, '3. Simpan Kenangan']];
   return `<div class="poster" style="background:${t.bg};color:${t.ink}">${decoOf(id)}<div class="pc">
     <div class="pb"><div style="color:${t.ink}">${logoSVG(54)}</div><b class="pw">Momentkan</b><span class="ptg">Abadikan momenmu dengan Momentkan</span>
       <h1 class="ph1">Scan di sini</h1><i class="pu" style="background:${t.acc}"></i>
@@ -838,7 +900,7 @@ function demo() {
     app.querySelectorAll('.bt').forEach(b => b.classList.toggle('on', !!D.ban && ((b.dataset.b === 'v' && D.ban.k === 'vid') || (D.ban.k === 'svg' && b.dataset.b === String(D.ban.i)))));
     $('dgm').textContent = 'Yang dilihat tamu: ' + gmsg();
     $('drw').hidden = !D.gv;
-    $('gprev').innerHTML = `<div class="gbn" style="margin-top:0">${media(D.ban)}</div><span class="gb">Kamera sekali pakai</span><h3 style="margin:0 0 8px;font-size:1.5rem">${esc(nm())}</h3><div class="shots">${[1, 1, 0, 0, 0].map(u => `<i class="${u ? 'u' : ''}"></i>`).join('')}</div><p class="lf"><b>3</b> bidikan tersisa</p><button type="button" class="full" data-fake>Ambil foto</button><button type="button" class="ghost full" data-fake>Lihat semua foto album</button><p class="mini" style="text-align:center">${esc(gmsg())}</p>`;
+    $('gprev').innerHTML = `<div class="gbn" style="margin-top:0">${media(D.ban)}</div><span class="gb">Photobooth</span><h3 style="margin:0 0 8px;font-size:1.5rem">${esc(nm())}</h3><div class="shots">${[1, 1, 0, 0, 0].map(u => `<i class="${u ? 'u' : ''}"></i>`).join('')}</div><p class="lf"><b>3</b> jatah foto tersisa</p><p class="mini" style="margin:8px 0 4px">Tamu memilih frame kolase:</p><div class="frames">${['single', 'duo', 'strip3', 'strip4', 'grid4', 'grid6'].map(k => `<div class="fr">${frameThumb(k)}<b>${FRAMES[k].n}</b></div>`).join('')}</div><button type="button" class="full" data-fake style="margin-top:12px">Mulai photobooth</button><button type="button" class="ghost full" data-fake>Lihat semua foto album</button><p class="mini" style="text-align:center">${esc(gmsg())}</p>`;
     $('gprev').querySelectorAll('[data-fake]').forEach(b => b.onclick = () => alert('Ini hanya contoh tampilan. Di album sungguhan, tombol ini membuka kamera HP tamu.'));
   };
   $('dn').oninput = () => { D.name = $('dn').value; paint(); };
@@ -1009,82 +1071,111 @@ async function guest(id) {
   const mine = (mp.data || []).map(r => ({ url: purl(r.path), thumb: purl(thumbOf(r.path)), dl: purl(r.path, 'momentkan-' + r.path.slice(-10)), name: r.guest_name || 'Tamu' }));
   const gAllowed = e.guest_view !== false, gOpen = gAllowed && (!e.reveal_at || new Date(e.reveal_at) <= new Date());
   const gMsg = !gAllowed ? 'Pemilik belum mengizinkan tamu melihat album.' : gOpen ? 'Album sudah bisa dilihat semua tamu.' : 'Album bisa dilihat mulai ' + fmt(e.reveal_at) + '.';
-  app.innerHTML = hdr() + (e.banner_path ? `<div class="gbn">${mediaHTML(e.banner_path)}</div>` : '') + `<div class="gh"><span class="gb">Kamera sekali pakai</span><h1 class="gt">${esc(e.name)}</h1></div><div id="roll"></div><div id="st"></div><p id="ms"></p><div class="ths" id="th"></div>
+  app.innerHTML = hdr() + (e.banner_path ? `<div class="gbn">${mediaHTML(e.banner_path)}</div>` : '') + `<div class="gh"><span class="gb">Photobooth</span><h1 class="gt">${esc(e.name)}</h1></div><div id="roll"></div><div id="st"></div><p id="ms"></p><div class="ths" id="th"></div>
   <a class="btn ghost full" data-nav href="?v=${id}">Lihat semua foto album</a><p class="mini" style="text-align:center">${gMsg}</p>${promoHTML()}`;
   const st = document.getElementById('st'), roll = document.getElementById('roll'), th = document.getElementById('th');
   const ms = (t, ok) => { const m = document.getElementById('ms'); if (!m) return; m.className = t && !ok ? 'err' : ''; m.textContent = t || ''; };
   const left = () => Math.max(0, limit - used);
-  const drawRoll = () => { roll.innerHTML = `<div class="shots" role="img" aria-label="${used} dari ${limit} bidikan terpakai">${Array.from({ length: limit }, (_, i) => `<i class="${i < used ? 'u' : ''}"></i>`).join('')}</div><p class="lf"><b>${left()}</b> bidikan tersisa</p>`; };
+  const drawRoll = () => { roll.innerHTML = `<div class="shots" role="img" aria-label="${used} dari ${limit} jatah terpakai">${Array.from({ length: limit }, (_, i) => `<i class="${i < used ? 'u' : ''}"></i>`).join('')}</div><p class="lf"><b>${left()}</b> jatah foto tersisa</p>`; };
   const drawTh = () => { th.innerHTML = mine.map((m, i) => `<button class="thb${m.pend ? ' pend' : ''}" data-i="${i}" aria-label="Lihat fotomu"><img src="${m.thumb || m.url}" onerror="this.onerror=null;this.src='${m.url}'" alt="Fotomu"></button>`).join(''); th.querySelectorAll('.thb').forEach(b => b.onclick = () => viewer(mine, Number(b.dataset.i))); };
-  const intro = () => {
-    drawRoll();
-    if (full) { st.innerHTML = '<div class="card"><h2>Kuota tamu penuh</h2><p>Album ini sudah mencapai batas jumlah tamu. Terima kasih sudah mampir!</p></div>'; return; }
-    if (!left()) { st.innerHTML = '<div class="card"><h2>Rolmu sudah habis</h2><p>Terima kasih sudah ikut mengabadikan momen ini. Kamu tetap bisa melihat album lewat tombol di bawah.</p></div>'; return; }
-    st.innerHTML = `<label for="gn">Nama kamu</label><input id="gn" maxlength="30" value="${esc(name)}" placeholder="Tamu"><label class="btn full shut" for="fi">Ambil foto</label><input id="fi" type="file" accept="image/*" capture="environment" hidden><p class="hint">Foto memakai kamera bawaan HP-mu. Setelah memotret, pilih salah satu dari 12 filter.</p>`;
-    document.getElementById('fi').onchange = ev => {
-      const f = ev.target.files[0]; if (!f) return;
-      name = document.getElementById('gn').value.trim(); localStorage.setItem('sr_name', name);
-      const im = new Image(); im.onload = () => { URL.revokeObjectURL(im.src); review(im); }; im.src = URL.createObjectURL(f);
+  let frame = 'strip3', fcol = 'putih', curF = 'original', shots = [], pend = -1, stage = 'intro';
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.setAttribute('capture', 'environment'); inp.hidden = true; app.appendChild(inp);
+  inp.onchange = ev => {
+    const f = ev.target.files[0]; ev.target.value = ''; if (!f || pend < 0) return;
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement('canvas');
+      c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(im.src);
+      shots[pend] = c; pend = -1; stage === 'review' ? review() : capture();
     };
+    im.src = URL.createObjectURL(f);
   };
 
-  const review = im => {
-    ms('');
-    const k = Math.min(1, 1800 / Math.max(im.naturalWidth, im.naturalHeight));
-    const base = document.createElement('canvas'); base.width = Math.round(im.naturalWidth * k); base.height = Math.round(im.naturalHeight * k);
-    base.getContext('2d').drawImage(im, 0, 0, base.width, base.height);
-    const pv = document.createElement('canvas'), out = document.createElement('canvas');
-    const rPv = mkGL(pv), rOut = mkGL(out), gl2 = !!(rPv && rOut);
-    let curF = 'original';
-    st.innerHTML = `<div class="cam" id="cm"><span class="fn" id="fn">Original</span></div>
-    ${gl2 ? `<div class="fstrip" id="fs" role="group" aria-label="Pilih filter">${Object.entries(FILTERS).map(([k2, v]) => `<button class="chip ghost${k2 === curF ? ' on' : ''}" data-f="${k2}">${v}</button>`).join('')}</div>` : ''}
-    <p class="mini" style="text-align:center;margin-top:10px">Atas nama <b>${esc(name || 'Tamu')}</b></p>
-    <div class="row" style="margin-top:12px"><button id="sd" style="flex:1">Kirim foto</button><button class="ghost" id="rt">Ulangi</button></div>`;
-    const cm = document.getElementById('cm');
-    if (gl2) {
-      cm.prepend(pv);
-      const draw = () => { rPv(base, 720, Math.round(720 * base.height / base.width), curF); document.getElementById('fn').textContent = FILTERS[curF]; };
-      draw();
-      st.querySelectorAll('#fs .chip').forEach(c => c.onclick = () => {
-        curF = c.dataset.f; st.querySelectorAll('#fs .chip').forEach(x => x.classList.toggle('on', x === c));
-        c.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); draw();
-      });
-    } else {
-      const img = new Image(); img.src = base.toDataURL('image/jpeg', .8); img.alt = 'Hasil fotomu'; img.style.cssText = 'display:block;width:100%;height:auto'; cm.prepend(img);
+  const intro = () => {
+    stage = 'intro'; shots = []; pend = -1; drawRoll();
+    if (full) { st.innerHTML = '<div class="card"><h2>Kuota tamu penuh</h2><p>Album ini sudah mencapai batas jumlah tamu. Terima kasih sudah mampir!</p></div>'; return; }
+    if (!left()) { st.innerHTML = '<div class="card"><h2>Jatahmu sudah habis</h2><p>Terima kasih sudah ikut mengabadikan momen ini. Kamu tetap bisa melihat album lewat tombol di bawah.</p></div>'; return; }
+    st.innerHTML = `<label for="gn">Nama kamu</label><input id="gn" maxlength="30" value="${esc(name)}" placeholder="Tamu"><button class="full shut" id="go">Mulai photobooth</button><p class="hint">Pilih frame kolase, ambil fotonya, lalu pilih filter dan kirim. Satu hasil dihitung satu jatah.</p>`;
+    document.getElementById('go').onclick = () => { name = document.getElementById('gn').value.trim(); localStorage.setItem('sr_name', name); pickFrame(); };
+  };
+
+  const pickFrame = () => {
+    stage = 'pick';
+    st.innerHTML = `<h3 style="margin:6px 0 0">Pilih frame</h3><div class="frames">${Object.entries(FRAMES).map(([k, f]) => `<button type="button" class="fr${k === frame ? ' on' : ''}" data-k="${k}">${frameThumb(k)}<b>${f.n}</b><span>${f.c} foto</span></button>`).join('')}</div><button class="full" id="fgo">Lanjut</button><button class="ghost full" id="fbk" style="margin-top:8px">Kembali</button>`;
+    st.querySelectorAll('.fr').forEach(b => b.onclick = () => { frame = b.dataset.k; st.querySelectorAll('.fr').forEach(x => x.classList.toggle('on', x === b)); });
+    document.getElementById('fgo').onclick = () => { shots = new Array(FRAMES[frame].c).fill(null); capture(); };
+    document.getElementById('fbk').onclick = intro;
+  };
+
+  const capture = () => {
+    stage = 'capture';
+    const f = FRAMES[frame], next = shots.findIndex(x => !x);
+    if (next < 0) return review();
+    st.innerHTML = `<p class="mini" style="margin:4px 0">${f.n} · foto ${next + 1} dari ${f.c}</p><div id="cp"></div><button class="full shut" id="snap">Ambil foto ${next + 1}</button><button class="ghost full" id="chg" style="margin-top:8px">Ganti frame</button>`;
+    if (frame !== 'single') {
+      const L = layoutOf(frame);
+      const cv = composeFrame({ imgs: shots, id: frame, col: fcol, f: 'original', r: null, scale: Math.min(1, 480 / L.W), guest: name, ev: e.name });
+      cv.style.cssText = 'width:100%;display:block;border-radius:10px;box-shadow:0 8px 24px rgba(27,31,59,.15);cursor:pointer';
+      document.getElementById('cp').appendChild(cv);
+      cv.onclick = ev => { const i = slotAt(cv, ev, L); if (i >= 0) { pend = i; inp.click(); } };
     }
-    document.getElementById('rt').onclick = intro;
+    document.getElementById('snap').onclick = () => { pend = next; inp.click(); };
+    document.getElementById('chg').onclick = pickFrame;
+  };
+
+  const review = async () => {
+    stage = 'review'; ms('');
+    try { await document.fonts.load("800 40px 'Plus Jakarta Sans'"); } catch (x) {}
+    const gl = (() => { const c = document.createElement('canvas'), fn = mkGL(c); return fn ? { fn, cv: c } : null; })();
+    const single = frame === 'single', L = single ? null : layoutOf(frame);
+    st.innerHTML = `<div id="pv"></div>
+    ${gl ? `<label>Filter</label><div class="fstrip" id="fs" role="group" aria-label="Pilih filter">${Object.entries(FILTERS).map(([k, v]) => `<button class="chip ghost${k === curF ? ' on' : ''}" data-f="${k}">${v}</button>`).join('')}</div>` : ''}
+    ${single ? '' : `<label>Warna frame</label><div class="chips" id="fc" style="justify-content:flex-start">${Object.entries(COLS).map(([k, v]) => `<button class="chip ghost${k === fcol ? ' on' : ''}" data-c="${k}">${v[0]}</button>`).join('')}</div><p class="mini">Ketuk salah satu foto di kolase untuk mengambilnya ulang.</p>`}
+    <p class="mini" style="text-align:center;margin-top:10px">Atas nama <b>${esc(name || 'Tamu')}</b></p>
+    <div class="row" style="margin-top:10px"><button id="sd" style="flex:1">Kirim</button><button class="ghost" id="rt">Ulangi</button></div>`;
+    const draw = () => {
+      const cv = composeFrame({ imgs: shots, id: frame, col: fcol, f: curF, r: gl, scale: single ? .45 : Math.min(1, 640 / L.W), guest: name, ev: e.name });
+      cv.style.cssText = 'width:100%;display:block;border-radius:10px;box-shadow:0 8px 24px rgba(27,31,59,.15)' + (single ? '' : ';cursor:pointer');
+      if (!single) cv.onclick = ev => { const i = slotAt(cv, ev, L); if (i >= 0) { pend = i; inp.click(); } };
+      const box = document.getElementById('pv'); box.innerHTML = ''; box.appendChild(cv);
+    };
+    draw();
+    st.querySelectorAll('#fs .chip').forEach(c => c.onclick = () => { curF = c.dataset.f; st.querySelectorAll('#fs .chip').forEach(x => x.classList.toggle('on', x === c)); draw(); });
+    st.querySelectorAll('#fc .chip').forEach(c => c.onclick = () => { fcol = c.dataset.c; st.querySelectorAll('#fc .chip').forEach(x => x.classList.toggle('on', x === c)); draw(); });
+    document.getElementById('rt').onclick = pickFrame;
     document.getElementById('sd').onclick = () => {
       const b = document.getElementById('sd'); b.disabled = true; b.textContent = 'Menyiapkan…';
       const nm = name || 'Tamu';
-      const send = async (blob, thumb) => {
-        const item = { url: URL.createObjectURL(blob), name: nm, pend: true };
-        mine.unshift(item); used++; pending++; drawTh(); intro();
-        ms('Fotomu dikirim di latar belakang. Kamu bisa lanjut memotret, tapi jangan tutup halaman ini.', true);
-        const stem = id + '/' + crypto.randomUUID(), path = stem + '.jpg';
-        const opt = { contentType: 'image/jpeg', cacheControl: '31536000' };
-        const [up] = await Promise.all([sb.storage.from('photos').upload(path, blob, opt), thumb ? sb.storage.from('photos').upload(stem + '_t.jpg', thumb, opt) : null]);
-        let err = up.error;
-        if (!err) { const ins = await sb.from('photos').insert({ event_id: id, guest_name: nm, guest_id: gid, path }); err = ins.error; }
-        pending--;
-        if (err) {
-          mine.splice(mine.indexOf(item), 1); drawTh();
-          const q = await sb.rpc('guest_status', { eid: id, gid });
-          if (q.data && q.data[0]) { used = q.data[0].used; full = q.data[0].guest_full; } else used = Math.max(0, used - 1);
-          drawRoll(); ms('Satu foto gagal terkirim. Jatah fotomu dikembalikan, silakan ambil lagi.');
-          return;
-        }
-        item.pend = false; drawTh(); confetti(); if (navigator.vibrate) navigator.vibrate(40);
-        ms(pending ? 'Masih mengirim ' + pending + ' foto…' : (left() ? 'Terkirim! Masih ada ' + left() + ' bidikan.' : 'Terkirim! Itu bidikan terakhirmu.'), true);
-      };
-      const toB = (cv, q) => new Promise(r => cv.toBlob(r, 'image/jpeg', q));
-      (async () => {
-        const k = 480 / Math.max(base.width, base.height), tw = Math.round(base.width * k), th = Math.round(base.height * k);
-        let full, thumb;
-        if (gl2) { rOut(base, base.width, base.height, curF); full = await toB(out, .85); rOut(base, tw, th, curF); thumb = await toB(out, .8); }
-        else { full = await toB(base, .85); const t = document.createElement('canvas'); t.width = tw; t.height = th; t.getContext('2d').drawImage(base, 0, 0, tw, th); thumb = await toB(t, .8); }
-        send(full, thumb);
-      })();
+      setTimeout(async () => {
+        const full = composeFrame({ imgs: shots, id: frame, col: fcol, f: curF, r: gl, scale: 1, guest: nm, ev: e.name });
+        const k = Math.min(1, 480 / Math.min(full.width, full.height), 900 / Math.max(full.width, full.height));
+        const t = document.createElement('canvas'); t.width = Math.round(full.width * k); t.height = Math.round(full.height * k); t.getContext('2d').drawImage(full, 0, 0, t.width, t.height);
+        const toB = (cv, q) => new Promise(r2 => cv.toBlob(r2, 'image/jpeg', q));
+        sendOut(await toB(full, .85), await toB(t, .8), nm);
+      }, 30);
     };
+  };
+
+  const sendOut = async (blob, thumb, nm) => {
+    const item = { url: URL.createObjectURL(blob), name: nm, pend: true };
+    mine.unshift(item); used++; pending++; drawTh(); intro();
+    ms('Hasilmu dikirim di latar belakang. Kamu bisa lanjut, tapi jangan tutup halaman ini.', true);
+    const stem = id + '/' + crypto.randomUUID(), path = stem + '.jpg';
+    const opt = { contentType: 'image/jpeg', cacheControl: '31536000' };
+    const [up] = await Promise.all([sb.storage.from('photos').upload(path, blob, opt), thumb ? sb.storage.from('photos').upload(stem + '_t.jpg', thumb, opt) : null]);
+    let err = up.error;
+    if (!err) { const ins = await sb.from('photos').insert({ event_id: id, guest_name: nm, guest_id: gid, path }); err = ins.error; }
+    pending--;
+    if (err) {
+      mine.splice(mine.indexOf(item), 1); drawTh();
+      const q = await sb.rpc('guest_status', { eid: id, gid });
+      if (q.data && q.data[0]) { used = q.data[0].used; full = q.data[0].guest_full; } else used = Math.max(0, used - 1);
+      drawRoll(); ms('Satu hasil gagal terkirim. Jatahmu dikembalikan, silakan coba lagi.');
+      return;
+    }
+    item.pend = false; drawTh(); confetti(); if (navigator.vibrate) navigator.vibrate(40);
+    ms(pending ? 'Masih mengirim ' + pending + '…' : (left() ? 'Terkirim! Masih ada ' + left() + ' jatah.' : 'Terkirim! Itu jatah terakhirmu.'), true);
   };
   drawTh(); intro();
 }
