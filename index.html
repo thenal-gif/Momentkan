@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Momentkan – Kamera tamu lewat QR</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&family=Caveat:wght@600;700&family=Dancing+Script:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;1,600&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
@@ -322,6 +322,9 @@ button,.btn{background:var(--g);color:#fff;box-shadow:0 6px 18px rgba(99,102,241
 .fr b{font-size:.8rem}
 .fr span{font-size:.7rem;color:var(--mut)}
 button.fr.on{border-color:var(--ac);background:#eef1ff}
+.fr img{height:150px;width:auto;max-width:100%;border-radius:6px;box-shadow:0 2px 8px rgba(27,31,59,.15)}
+.ig{background:linear-gradient(45deg,#f9a03f,#e1306c,#833ab4)!important;color:#fff!important}
+.tpw canvas{width:52%;display:block;margin:0 auto 12px;border-radius:10px;box-shadow:0 8px 24px rgba(27,31,59,.15)}
 </style>
 </head>
 <body>
@@ -338,9 +341,9 @@ const app = document.getElementById('app');
 const PLANS = { basic: { name: 'Basic', guests: 20, shots: 5, price: 79900, old: 109000 }, pro: { name: 'Pro', guests: 100, shots: 10, price: 199900, old: 299000 }, unlimited: { name: 'Unlimited', guests: null, shots: 20, price: 499900, old: 599000 } };
 const rp = n => 'Rp' + n.toLocaleString('id-ID');
 const PF = {
-  basic: { tag: 'Untuk acara kecil', head: 'Termasuk:', items: ['Hingga 20 tamu', '5 foto/kolase per tamu', '12 pilihan filter', 'Galeri online dan unduh foto', 'Album bisa dibagikan ke semua tamu'] },
-  pro: { tag: 'Untuk acara keluarga dan teman', head: 'Semua fitur Basic, ditambah:', items: ['Hingga 100 tamu', '10 foto/kolase per tamu'] },
-  unlimited: { tag: 'Untuk acara besar tanpa batas', head: 'Semua fitur Pro, ditambah:', items: ['Tamu tanpa batas (∞)', '20 foto/kolase per tamu'] }
+  basic: { tag: 'Untuk acara kecil', head: 'Termasuk:', items: ['Hingga 20 tamu', '5 foto/kolase per tamu', '12 pilihan filter', 'Galeri online dan unduh foto', '4 template kolase lucu', 'Bagikan hasil ke Story Instagram', 'Album bisa dibagikan ke semua tamu'] },
+  pro: { tag: 'Untuk acara keluarga dan teman', head: 'Semua fitur Basic, ditambah:', items: ['Hingga 100 tamu', '10 foto/kolase per tamu', '7 template kolase lucu'] },
+  unlimited: { tag: 'Untuk acara besar tanpa batas', head: 'Semua fitur Pro, ditambah:', items: ['Tamu tanpa batas (∞)', '20 foto/kolase per tamu', '10 template kolase lengkap'] }
 };
 const FILTERS = { original: 'Original', disposable: 'Disposable', vintage: 'Vintage', filmgrain: 'Film Grain', warm: 'Warm', soft: 'Soft', bw: 'Black & White', wedding: 'Wedding Glow', champagne: 'Champagne', birthday: 'Birthday Pop', flashnight: 'Flash Night', nostalgia: 'Nostalgia' };
 /* Parameter filter: gain=pengali warna, add=angkat hitam/tint, shT/hiT=warna bayangan/highlight, con=kontras, sat=saturasi,
@@ -723,11 +726,13 @@ const FRAMES = {
 };
 const COLS = { putih: ['Putih', '#ffffff', '#1b1f3b'], krem: ['Krem', '#f6efe2', '#3a2f20'], hitam: ['Hitam', '#111111', '#f5f5f5'], pink: ['Pink', '#fbd9e0', '#5a2a3a'], gradasi: ['Gradasi', 'grad', '#ffffff'] };
 const layoutOf = id => {
+  if (FRAMES[id].tpl) { const t = TPLS[id], sh = t.sh || 440, sw = t.sw || 720, top = t.top || 300, dx = (1080 - sw) / 2; return { W: 1080, H: 1920, slots: [0, 1, 2].map(i => [dx, top + i * (sh + 30), sw, sh]) }; }
   const f = FRAMES[id], m = 40, g = 24, cap = 170, s = f.s, cols = f.cols, rows = Math.ceil(f.c / cols);
   const W = 2 * m + cols * s + (cols - 1) * g, H = m + rows * s + (rows - 1) * g + cap;
   return { W, H, slots: Array.from({ length: f.c }, (_, i) => [m + (i % cols) * (s + g), m + Math.floor(i / cols) * (s + g), s, s]), cap: [0, H - cap, W, cap] };
 };
 const frameThumb = id => {
+  if (FRAMES[id].tpl) return tplThumb(id);
   if (id === 'single') return '<svg viewBox="0 0 60 80" aria-hidden="true"><rect x="4" y="4" width="52" height="72" rx="4" fill="#c9d1ff"/></svg>';
   const L = layoutOf(id);
   return `<svg viewBox="0 0 ${L.W} ${L.H}" aria-hidden="true"><rect x="5" y="5" width="${L.W - 10}" height="${L.H - 10}" rx="24" fill="#fff" stroke="#c9ceea" stroke-width="10"/>${L.slots.map(([x, y, w, h]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#c9d1ff"/>`).join('')}<rect x="${L.W * .25}" y="${L.H - 100}" width="${L.W * .5}" height="24" rx="12" fill="#c9ceea"/></svg>`;
@@ -743,6 +748,7 @@ const setFit = (x, text, weight, maxW, start) => { let px = start; const set = (
 const composeFrame = o => {
   const { imgs, id, f, scale, r } = o;
   const filt = (src, w, h) => { if (!r || f === 'original') return src; r.fn(src, w, h, f); return r.cv; };
+  if (FRAMES[id].tpl) return composeTpl(o, filt);
   if (id === 'single') {
     const im = imgs[0], k = Math.min(1, 1800 / Math.max(im.width, im.height)) * scale, w = Math.max(1, Math.round(im.width * k)), h = Math.max(1, Math.round(im.height * k));
     const t = document.createElement('canvas'); t.width = w; t.height = h; t.getContext('2d').drawImage(im, 0, 0, w, h);
@@ -765,6 +771,231 @@ const composeFrame = o => {
   setFit(x, sub, 600, mw, 28); x.globalAlpha = .85; x.fillText(sub, cx, cy + 108);
   x.globalAlpha = .55; x.font = "700 22px 'Plus Jakarta Sans', sans-serif"; x.fillText('Momentkan', cx, cy + 146); x.globalAlpha = 1;
   return cv;
+};
+
+/* ===== Template kolase lucu (1080×1920, rasio Story Instagram) ===== */
+const TPL_LIMIT = { basic: 4, pro: 7, unlimited: 10 };
+const TPL_SAMPLE = { pre: 'The Wedding of', names: 'A & B', date: '23 . 08 . 2025', thanks: 'Thank you for being here' };
+let TPL_CUR = TPL_SAMPLE, TPL_TH = {};
+const TX = { hand: "'Caveat', 'Segoe Print', cursive", script: "'Dancing Script', 'Brush Script MT', cursive", serif: "'Cormorant Garamond', Georgia, serif" };
+const INK = '#1c1c1c';
+const loadTplFonts = () => Promise.race([
+  Promise.all(["700 100px Caveat", "700 80px 'Dancing Script'", "600 30px 'Cormorant Garamond'", "italic 600 30px 'Cormorant Garamond'"].map(f => document.fonts.load(f).catch(() => {}))),
+  new Promise(r => setTimeout(r, 3000))
+]);
+const tplText = (cfg, evName) => { cfg = cfg || {}; return { pre: cfg.pre ?? '', names: cfg.names ?? evName ?? '', date: cfg.date ?? '', thanks: cfg.thanks ?? TPL_SAMPLE.thanks }; };
+
+/* --- helper teks --- */
+const tFit = (x, s, font, px, maxW, wt) => { let p = px; const set = () => x.font = ((wt || '') + ' ' + p + 'px ' + font).trim(); set(); while (x.measureText(s).width > maxW && p > 18) { p -= 2; set(); } return p; };
+const tTxt = (x, s, cx, y, font, px, col, o = {}) => {
+  if (!s) return; x.save(); x.fillStyle = col; x.textAlign = o.al || 'center'; x.textBaseline = 'alphabetic';
+  if (o.rot) { x.translate(cx, y); x.rotate(o.rot); cx = 0; y = 0; }
+  tFit(x, s, font, px, o.mw || 900, o.wt); x.fillText(s, cx, y); x.restore();
+};
+const tSp = (x, s, cx, y, px, col, gap = 6, o = {}) => {
+  if (!s) return; x.save(); x.fillStyle = col; x.font = (o.wt || 600) + ' ' + px + 'px ' + TX.serif; x.textBaseline = 'alphabetic'; x.textAlign = 'left';
+  const ch = [...s], w = ch.map(c => x.measureText(c).width + gap), tot = w.reduce((a, b) => a + b, 0) - gap;
+  let sx = o.al === 'left' ? cx : o.al === 'right' ? cx - tot : cx - tot / 2;
+  ch.forEach((c, i) => { x.fillText(c, sx, y); sx += w[i]; }); x.restore();
+};
+/* blok info bawah: pre / nama / tanggal (baris kosong dilewati) */
+const tInfo = (x, T, cx, y, col, al = 'center') => {
+  let yy = y;
+  if (T.pre) { tTxt(x, T.pre, cx, yy, TX.serif, 38, col, { al, wt: 'italic 600', mw: 560 }); yy += 62; }
+  if (T.names) { tTxt(x, T.names, cx, yy, TX.script, 76, col, { al, wt: '700', mw: 560 }); yy += 50; }
+  if (T.date) tSp(x, T.date, cx, yy, 26, col, 7, { al });
+};
+/* blok header tengah: THE WEDDING OF / nama / tanggal */
+const tHead = (x, T, y, col) => {
+  let yy = y;
+  if (T.pre) { tSp(x, T.pre.toUpperCase(), 540, yy, 30, col, 9); yy += 95; } else yy += 40;
+  tTxt(x, T.names, 540, yy, TX.script, 112, col, { wt: '700', mw: 820 }); yy += 55;
+  tSp(x, T.date, 540, yy, 26, col, 8);
+};
+
+/* --- helper doodle --- */
+const tBase = (x, c) => { x.fillStyle = c; x.fillRect(0, 0, 1080, 1920); };
+const tRR = (x, a, b, w, h, r) => { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); };
+const dHeart = (x, cx, cy, s, col, fill, lw = 5) => {
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.beginPath(); x.moveTo(0, 9); x.bezierCurveTo(-20, -4, -12, -20, 0, -8); x.bezierCurveTo(12, -20, 20, -4, 0, 9); x.closePath();
+  if (fill) { x.fillStyle = col; x.fill(); } else { x.strokeStyle = col; x.lineWidth = lw / s; x.lineJoin = 'round'; x.stroke(); } x.restore();
+};
+const dSpark = (x, cx, cy, r, col, lw = 5) => {
+  x.save(); x.translate(cx, cy); x.strokeStyle = col; x.lineWidth = lw; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath();
+  x.moveTo(0, -r); x.quadraticCurveTo(0, 0, r, 0); x.quadraticCurveTo(0, 0, 0, r); x.quadraticCurveTo(0, 0, -r, 0); x.quadraticCurveTo(0, 0, 0, -r); x.closePath(); x.stroke(); x.restore();
+};
+const dBurst = (x, cx, cy, r, col, ang = 0) => {
+  x.save(); x.translate(cx, cy); x.rotate(ang); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round';
+  [-.55, 0, .55].forEach(a => { x.beginPath(); x.moveTo(Math.cos(a) * r, Math.sin(a) * r); x.lineTo(Math.cos(a) * r * 2, Math.sin(a) * r * 2); x.stroke(); }); x.restore();
+};
+const dFlower = (x, cx, cy, r, petal, mid, line) => {
+  x.save(); x.translate(cx, cy); x.lineWidth = 4; x.strokeStyle = line; x.fillStyle = petal; x.lineJoin = 'round';
+  for (let i = 0; i < 5; i++) { x.save(); x.rotate(i * 1.2566); x.beginPath(); x.ellipse(0, -r * .62, r * .42, r * .62, 0, 0, 7); x.fill(); x.stroke(); x.restore(); }
+  x.beginPath(); x.arc(0, 0, r * .28, 0, 7); x.fillStyle = mid; x.fill(); x.stroke(); x.restore();
+};
+const dLeaf = (x, cx, cy, len, ang, fill, line) => {
+  x.save(); x.translate(cx, cy); x.rotate(ang); x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(len * .5, -len * .38, len, 0); x.quadraticCurveTo(len * .5, len * .38, 0, 0);
+  x.fillStyle = fill; x.fill(); if (line) { x.strokeStyle = line; x.lineWidth = 3; x.stroke(); } x.restore();
+};
+const dBranch = (x, x0, y0, len, ang, fill, line) => {
+  x.save(); x.translate(x0, y0); x.rotate(ang); x.strokeStyle = line; x.lineWidth = 4; x.lineCap = 'round';
+  x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(len * .5, -len * .08, len, 0); x.stroke();
+  for (let i = 1; i <= 6; i++) { const px = len * i / 7; dLeaf(x, px, -2, len * .2, -.9, fill, line); dLeaf(x, px + 10, 2, len * .2, .9, fill, line); }
+  dLeaf(x, len, 0, len * .2, 0, fill, line); x.restore();
+};
+const dBouquet = (x, cx, cy, s, petal, mid, line, leaf) => {
+  const fs = [[-50, -110], [10, -145], [58, -95]];
+  x.save(); x.strokeStyle = line; x.lineWidth = 4; x.lineCap = 'round';
+  fs.forEach(([dx, dy]) => { x.beginPath(); x.moveTo(cx, cy); x.quadraticCurveTo(cx + dx * .3 * s, cy + dy * .5 * s, cx + dx * s, cy + dy * s); x.stroke(); });
+  dLeaf(x, cx + 4, cy - 50 * s, 60 * s, -2.4, leaf, line); dLeaf(x, cx + 8, cy - 40 * s, 60 * s, -.7, leaf, line);
+  fs.forEach(([dx, dy]) => dFlower(x, cx + dx * s, cy + dy * s, 34 * s, petal, mid, line)); x.restore();
+};
+const dTape = (x, cx, cy, w, h, ang, col) => { x.save(); x.translate(cx, cy); x.rotate(ang); x.fillStyle = col; x.fillRect(-w / 2, -h / 2, w, h); x.restore(); };
+const dBow = (x, cx, cy, s, fill, line) => {
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.lineWidth = 3; x.strokeStyle = line; x.fillStyle = fill; x.lineJoin = 'round';
+  [-1, 1].forEach(d => { x.beginPath(); x.moveTo(0, 0); x.bezierCurveTo(d * 20, -40, d * 70, -38, d * 62, 2); x.bezierCurveTo(d * 70, 36, d * 22, 38, 0, 0); x.fill(); x.stroke(); });
+  [-1, 1].forEach(d => { x.beginPath(); x.moveTo(d * 4, 8); x.quadraticCurveTo(d * 20, 40, d * 34, 66); x.lineTo(d * 18, 60); x.quadraticCurveTo(d * 8, 40, d * 2, 12); x.closePath(); x.fill(); x.stroke(); });
+  x.beginPath(); x.arc(0, 0, 10, 0, 7); x.fill(); x.stroke(); x.restore();
+};
+const dCloud = (x, cx, cy, s) => { x.save(); x.translate(cx, cy); x.scale(s, s); x.fillStyle = 'rgba(255,255,255,.88)'; [[0, 0, 46], [50, -22, 56], [112, 0, 44], [58, 14, 50]].forEach(([a, b, r]) => { x.beginPath(); x.arc(a, b, r, 0, 7); x.fill(); }); x.restore(); };
+const dSmile = (x, cx, cy, r, col) => {
+  x.save(); x.translate(cx, cy); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = 5; x.lineCap = 'round';
+  x.beginPath(); x.arc(0, 0, r, 0, 7); x.stroke(); x.beginPath(); x.arc(-r * .35, -r * .2, r * .09, 0, 7); x.fill(); x.beginPath(); x.arc(r * .35, -r * .2, r * .09, 0, 7); x.fill();
+  x.beginPath(); x.arc(0, r * .05, r * .5, .15 * Math.PI, .85 * Math.PI); x.stroke(); x.restore();
+};
+const dSun = (x, cx, cy, r, col) => {
+  x.save(); x.translate(cx, cy); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.arc(0, 0, r, 0, 7); x.stroke();
+  for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; x.beginPath(); x.moveTo(Math.cos(a) * r * 1.4, Math.sin(a) * r * 1.4); x.lineTo(Math.cos(a) * r * 1.9, Math.sin(a) * r * 1.9); x.stroke(); } x.restore();
+};
+const dCam = (x, cx, cy, s, col) => {
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.strokeStyle = col; x.lineWidth = 5; x.lineJoin = 'round';
+  tRR(x, -42, -26, 84, 58, 10); x.stroke(); tRR(x, -16, -40, 32, 14, 4); x.stroke(); x.beginPath(); x.arc(0, 3, 17, 0, 7); x.stroke();
+  x.fillStyle = col; x.beginPath(); x.arc(28, -12, 3.5, 0, 7); x.fill(); x.restore();
+};
+const dGlass = (x, cx, cy, s, col) => {
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.strokeStyle = col; x.lineWidth = 4; x.lineJoin = 'round'; x.lineCap = 'round';
+  [[-1, -30], [1, 30]].forEach(([d, ox]) => { x.save(); x.translate(ox, 0); x.rotate(d * .28); x.beginPath(); x.moveTo(-18, -80); x.lineTo(-14, -14); x.quadraticCurveTo(0, 8, 14, -14); x.lineTo(18, -80); x.closePath(); x.stroke(); x.beginPath(); x.moveTo(0, 0); x.lineTo(0, 50); x.moveTo(-16, 50); x.lineTo(16, 50); x.stroke(); x.restore(); });
+  x.restore();
+};
+const dWingHeart = (x, cx, cy, s, col) => {
+  x.save(); x.translate(cx, cy); x.scale(s, s); x.strokeStyle = col; x.lineWidth = 4; x.lineJoin = 'round'; x.fillStyle = '#fff';
+  [-1, 1].forEach(d => { x.beginPath(); x.moveTo(d * 30, -10); x.quadraticCurveTo(d * 70, -60, d * 92, -30); x.quadraticCurveTo(d * 74, -22, d * 88, -8); x.quadraticCurveTo(d * 66, -4, d * 74, 12); x.quadraticCurveTo(d * 52, 8, d * 30, 14); x.closePath(); x.fill(); x.stroke(); });
+  x.beginPath(); x.moveTo(0, 46); x.bezierCurveTo(-64, 0, -40, -56, 0, -24); x.bezierCurveTo(40, -56, 64, 0, 0, 46); x.closePath(); x.fill(); x.stroke(); x.restore();
+};
+const dChecker = (x, x0, y0, cols, rows, s, col) => { x.fillStyle = col; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if ((r + c) % 2 === 0) x.fillRect(x0 + c * s, y0 + r * s, s, s); };
+const dSquig = (x, x0, y0, w, col) => { x.save(); x.strokeStyle = col; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(x0, y0); x.bezierCurveTo(x0 + w * .3, y0 - 30, x0 + w * .6, y0 + 30, x0 + w, y0 - 8); x.stroke(); x.restore(); };
+
+/* --- 10 template. top/sh/sw = posisi & ukuran slot foto --- */
+const TPLS = {
+  t_better: { n: 'Better Together', top: 300, sh: 440,
+    bg(x, T) {
+      tBase(x, '#fbf5e6'); x.strokeStyle = '#eadfc6'; x.lineWidth = 4; x.strokeRect(34, 34, 1012, 1852);
+      tTxt(x, 'Better', 90, 150, TX.hand, 128, INK, { al: 'left', wt: 700, rot: -.04 }); tTxt(x, 'Together', 120, 262, TX.hand, 128, INK, { al: 'left', wt: 700, rot: -.04 });
+      dHeart(x, 905, 125, 2.7, INK); dSpark(x, 950, 215, 18, INK); dSpark(x, 62, 450, 16, INK); dHeart(x, 62, 780, 1.7, INK); dBurst(x, 1015, 800, 12, INK, -.3);
+      dBouquet(x, 150, 1890, 1.3, '#ffffff', '#f3d66b', INK, '#9bb48a'); tInfo(x, T, 990, 1770, '#2b2b2b', 'right');
+    } },
+  t_happy: { n: 'Happy Wedding', top: 320, sh: 430,
+    bg(x, T) {
+      tBase(x, '#fde7e5'); x.fillStyle = '#fbd3d6'; x.beginPath(); x.ellipse(70, 560, 250, 430, 0, 0, 7); x.fill(); x.beginPath(); x.ellipse(1020, 1480, 300, 380, 0, 0, 7); x.fill();
+      x.fillStyle = '#fff1ee'; x.beginPath(); x.ellipse(930, 330, 190, 230, 0, 0, 7); x.fill();
+      tTxt(x, 'Happy', 600, 150, TX.hand, 140, INK, { wt: 700, rot: -.05 }); tTxt(x, 'Wedding', 650, 270, TX.hand, 140, INK, { wt: 700, rot: -.05 });
+      dBow(x, 130, 250, 1.5, '#e58b8b', '#b5545a'); dHeart(x, 985, 215, 2, INK); dSpark(x, 58, 520, 15, INK); dSpark(x, 1022, 780, 15, INK);
+      tTxt(x, T.thanks, 80, 1780, TX.hand, 60, INK, { al: 'left', wt: 600, mw: 560 }); tTxt(x, T.names, 80, 1855, TX.script, 54, INK, { al: 'left', wt: 700, mw: 520 });
+      dSquig(x, 80, 1895, 260, INK); dBouquet(x, 950, 1890, 1.3, '#ffd9de', '#f2a6b2', '#8a4a56', '#8fae8b');
+    } },
+  t_sage: { n: 'Sage Garden', top: 340, sh: 430,
+    bg(x, T) {
+      tBase(x, '#dfe6d3'); x.fillStyle = 'rgba(190,205,170,.35)'; x.beginPath(); x.ellipse(200, 700, 260, 180, .4, 0, 7); x.fill(); x.beginPath(); x.ellipse(900, 1300, 300, 200, -.3, 0, 7); x.fill();
+      dBranch(x, 0, 30, 280, .75, '#8ea67d', '#55654b'); dBranch(x, 1080, 1900, 360, -2.45, '#8ea67d', '#55654b');
+      tHead(x, T, 95, '#55654b'); ['GOOD VIBES', 'GOOD PEOPLE', 'GREAT MEMORIES'].forEach((s, i) => tSp(x, s, 540, 1780 + i * 40, 24, '#6f7d63', 7));
+    },
+    fg(x) { dTape(x, 540, 340, 200, 56, -.04, 'rgba(222,205,170,.88)'); } },
+  t_love: { n: 'Love Looks Good', top: 400, sh: 400,
+    bg(x, T) {
+      tBase(x, '#e8d5bb'); x.fillStyle = '#f6ecdd'; x.beginPath(); x.moveTo(70, 0);
+      for (let y = 0; y <= 1920; y += 20) x.lineTo(70 + Math.sin(y / 95) * 26, y);
+      for (let y = 1920; y >= 0; y -= 20) x.lineTo(1010 + Math.sin(y / 80) * 28, y); x.closePath(); x.fill();
+      tTxt(x, 'Love', 280, 150, TX.hand, 118, INK, { al: 'left', wt: 700, rot: -.06 }); tTxt(x, 'Looks Good', 300, 255, TX.hand, 118, INK, { al: 'left', wt: 700, rot: -.06 }); tTxt(x, 'On You', 320, 355, TX.hand, 118, INK, { al: 'left', wt: 700, rot: -.06 });
+      dHeart(x, 950, 300, 2.4, '#4b2e1e', true); dSpark(x, 130, 520, 15, '#4b2e1e'); dSpark(x, 970, 1000, 15, '#4b2e1e');
+      dGlass(x, 170, 1800, 1.25, '#4b2e1e'); tInfo(x, T, 940, 1740, '#4a3a2a', 'right');
+    } },
+  t_same: { n: 'Same Love', top: 380, sh: 420,
+    bg(x, T) {
+      tBase(x, '#fbf5ea'); x.fillStyle = '#111'; x.beginPath(); x.moveTo(0, 0); x.lineTo(580, 0); x.bezierCurveTo(620, 120, 540, 270, 390, 330); x.bezierCurveTo(240, 395, 60, 420, 0, 520); x.closePath(); x.fill();
+      dChecker(x, 1000, 150, 2, 8, 40, '#111'); dChecker(x, 1000, 1040, 2, 8, 40, '#111'); dSmile(x, 980, 90, 38, INK);
+      x.save(); x.translate(320, 215); x.rotate(-.06); x.shadowColor = 'rgba(0,0,0,.25)'; x.shadowBlur = 14; x.fillStyle = '#fff'; tRR(x, -250, -140, 500, 280, 34); x.fill(); x.restore();
+      ['Same Love', 'Different', 'Faces'].forEach((s, i) => tTxt(x, s, 320, 175 + i * 82, TX.hand, 84, INK, { wt: 700, rot: -.06, mw: 440 }));
+      dSpark(x, 62, 520, 17, INK); dSpark(x, 62, 610, 12, INK); dHeart(x, 66, 740, 1.7, INK); dSpark(x, 62, 870, 17, INK);
+      tInfo(x, T, 90, 1775, INK, 'left'); dHeart(x, 900, 1830, 2.6, INK); dHeart(x, 975, 1815, 2.3, INK); dSquig(x, 840, 1885, 200, INK);
+    } },
+  t_day: { n: 'Good Day', top: 310, sh: 430,
+    bg(x, T) {
+      const g = x.createLinearGradient(0, 0, 0, 1920); g.addColorStop(0, '#b3d6f0'); g.addColorStop(1, '#e6f3fb'); x.fillStyle = g; x.fillRect(0, 0, 1080, 1920);
+      dCloud(x, 700, 120, 1); dCloud(x, 40, 420, 1.3); dCloud(x, 900, 650, 1.4); dCloud(x, 20, 1200, 1.5); dCloud(x, 880, 1450, 1.3);
+      tTxt(x, 'Good', 80, 150, TX.hand, 124, INK, { al: 'left', wt: 700, rot: -.04 }); tTxt(x, 'Day', 110, 265, TX.hand, 124, INK, { al: 'left', wt: 700, rot: -.04 });
+      dSmile(x, 380, 215, 28, INK); dSun(x, 960, 140, 36, INK);
+      tTxt(x, T.thanks, 80, 1790, TX.hand, 62, INK, { al: 'left', wt: 600, mw: 640 }); tTxt(x, T.names, 80, 1862, TX.script, 54, INK, { al: 'left', wt: 700, mw: 560 }); dCam(x, 950, 1810, 1.6, INK);
+    } },
+  t_floral: { n: 'Floral Cream', top: 340, sh: 430,
+    bg(x, T) {
+      tBase(x, '#f7efe3'); const C = '#6a5a44';
+      dBranch(x, 0, 50, 300, .55, '#a6b793', '#6a7a5a'); dFlower(x, 90, 130, 46, '#fffaf0', '#e8c978', '#8a7a60'); dFlower(x, 180, 75, 34, '#fffaf0', '#e8c978', '#8a7a60');
+      dBranch(x, 1080, 1880, 380, -2.6, '#a6b793', '#6a7a5a'); dFlower(x, 985, 1790, 58, '#fffaf0', '#e8c978', '#8a7a60'); dFlower(x, 1040, 1700, 40, '#fffaf0', '#e8c978', '#8a7a60'); dFlower(x, 900, 1850, 36, '#fffaf0', '#e8c978', '#8a7a60');
+      tHead(x, T, 95, C); tSp(x, 'FOREVER', 120, 1800, 26, C, 8, { al: 'left' }); tSp(x, 'AND ALWAYS', 120, 1842, 26, C, 8, { al: 'left' }); dHeart(x, 128, 1885, .9, C, true);
+    } },
+  t_capture: { n: 'Capture The Love', top: 330, sh: 420,
+    bg(x, T) {
+      tBase(x, '#d9d0ee'); const P = '#2d2070';
+      tTxt(x, 'Capture', 100, 140, TX.hand, 124, P, { al: 'left', wt: 700, rot: -.05 }); tTxt(x, 'The Love', 300, 250, TX.hand, 124, P, { al: 'left', wt: 700, rot: -.05 });
+      dHeart(x, 940, 170, 2.5, P); dBurst(x, 880, 70, 12, P, -.7);
+      tInfo(x, T, 90, 1775, P, 'left'); dHeart(x, 940, 1830, 3.2, P); dBurst(x, 870, 1790, 12, P, -2.6);
+    },
+    fg(x, T, L) { L.slots.forEach(([sx, sy, sw], i) => { const l = i % 2 === 0; dTape(x, l ? sx + 40 : sx + sw - 40, sy - 4, 170, 52, l ? -.6 : .6, 'rgba(160,132,214,.78)'); }); } },
+  t_arch: { n: 'Arch Elegan', top: 340, sh: 420, sw: 640,
+    bg(x, T) {
+      tBase(x, '#f7f0e2'); const C = '#6a5a44';
+      x.beginPath(); x.moveTo(110, 1850); x.lineTo(110, 520); x.arc(540, 520, 430, Math.PI, 0); x.lineTo(970, 1850); x.closePath(); x.fillStyle = '#fbf7ee'; x.fill(); x.strokeStyle = '#cdbfa6'; x.lineWidth = 4; x.stroke();
+      tSp(x, 'TOGETHER', 540, 215, 34, C, 10); tSp(x, 'FOREVER', 540, 262, 34, C, 10); dHeart(x, 540, 305, .9, C, true);
+      dBranch(x, 1000, 450, 260, 2.2, '#a6b793', '#6a7a5a'); dFlower(x, 925, 335, 60, '#ffffff', '#e6c986', '#8a7a60'); dFlower(x, 985, 420, 40, '#ffffff', '#e6c986', '#8a7a60');
+      dBranch(x, 60, 1900, 300, -1.2, '#a6b793', '#6a7a5a'); dFlower(x, 160, 1770, 64, '#ffffff', '#e6c986', '#8a7a60'); dFlower(x, 100, 1690, 42, '#ffffff', '#e6c986', '#8a7a60');
+      tInfo(x, T, 540, 1750, C, 'center');
+    } },
+  t_just: { n: 'Just Married', top: 320, sh: 430,
+    bg(x, T) {
+      tBase(x, '#fdf3d6'); x.fillStyle = '#fbe08c'; x.beginPath(); x.ellipse(150, 170, 420, 230, 0, 0, 7); x.fill(); x.beginPath(); x.ellipse(990, 1760, 420, 320, 0, 0, 7); x.fill();
+      tTxt(x, 'Just', 100, 150, TX.hand, 128, INK, { al: 'left', wt: 700, rot: -.05 }); tTxt(x, 'Married', 120, 270, TX.hand, 128, INK, { al: 'left', wt: 700, rot: -.05 });
+      dFlower(x, 985, 170, 36, '#ffffff', '#f6c942', INK); dSpark(x, 62, 520, 16, INK); dBurst(x, 1000, 330, 12, INK, .6); dBurst(x, 62, 1000, 12, INK, -.3); dHeart(x, 70, 880, 1.7, INK);
+      tTxt(x, T.thanks, 80, 1785, TX.hand, 58, INK, { al: 'left', wt: 600, mw: 600 }); tTxt(x, T.names, 80, 1858, TX.script, 52, INK, { al: 'left', wt: 700, mw: 520 }); dWingHeart(x, 920, 1790, 1.3, INK);
+    } }
+};
+const TPL_ORDER = Object.keys(TPLS);
+TPL_ORDER.forEach(k => { FRAMES[k] = { n: TPLS[k].n, c: 3, tpl: true }; });
+const tplIds = plan => TPL_ORDER.slice(0, TPL_LIMIT[plan] || TPL_LIMIT.basic);
+
+/* o: { imgs, id, f, scale, r, tpl, thumb } ; filt = fungsi filter dari composeFrame */
+const composeTpl = (o, filt) => {
+  const { imgs, id, scale } = o, t = TPLS[id], L = layoutOf(id), T = Object.assign({}, TPL_SAMPLE, o.tpl || {});
+  const cv = document.createElement('canvas'); cv.width = Math.round(L.W * scale); cv.height = Math.round(L.H * scale);
+  const x = cv.getContext('2d'); x.scale(scale, scale);
+  t.bg(x, T);
+  L.slots.forEach(([sx, sy, sw, sh], i) => {
+    x.save(); x.shadowColor = 'rgba(60,40,20,.2)'; x.shadowBlur = 18; x.shadowOffsetY = 6; x.fillStyle = '#fff'; x.fillRect(sx - 14, sy - 14, sw + 28, sh + 28); x.restore();
+    const im = imgs[i];
+    if (!im) {
+      x.fillStyle = '#c9c9cf'; x.fillRect(sx, sy, sw, sh);
+      if (!o.thumb) { x.fillStyle = 'rgba(40,40,60,.55)'; x.font = "700 130px " + TX.hand; x.textAlign = 'center'; x.fillText(String(i + 1), sx + sw / 2, sy + sh / 2 + 44); }
+      return;
+    }
+    const w = Math.round(sw * scale), h = Math.round(sh * scale);
+    x.drawImage(filt(cover(im, w, h), w, h), sx, sy, sw, sh);
+  });
+  if (t.fg) t.fg(x, T, L);
+  return cv;
+};
+const tplThumb = id => {
+  const key = id + JSON.stringify(TPL_CUR);
+  if (!TPL_TH[key]) TPL_TH[key] = composeTpl({ imgs: [], id, scale: .15, tpl: TPL_CUR, thumb: true }, s => s).toDataURL('image/jpeg', .75);
+  return `<img src="${TPL_TH[key]}" alt="">`;
 };
 
 /* ===== Template cetak QR ===== */
@@ -861,6 +1092,7 @@ const SBN = [
 const bnSVG = i => { const c = SBN[i]; return `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-label="${c.n}"><defs><linearGradient id="bs${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.a}"/><stop offset="1" stop-color="${c.b}"/></linearGradient></defs><rect width="320" height="180" fill="url(#bs${i})"/>${c.s()}</svg>`; };
 
 function demo() {
+  TPL_CUR = TPL_SAMPLE;
   const D = { name: '', ban: null, gv: true, mode: 'now', when: '' };
   const $ = i => document.getElementById(i);
   const nm = () => D.name.trim() || 'Nama acaramu';
@@ -900,7 +1132,7 @@ function demo() {
     app.querySelectorAll('.bt').forEach(b => b.classList.toggle('on', !!D.ban && ((b.dataset.b === 'v' && D.ban.k === 'vid') || (D.ban.k === 'svg' && b.dataset.b === String(D.ban.i)))));
     $('dgm').textContent = 'Yang dilihat tamu: ' + gmsg();
     $('drw').hidden = !D.gv;
-    $('gprev').innerHTML = `<div class="gbn" style="margin-top:0">${media(D.ban)}</div><span class="gb">Photobooth</span><h3 style="margin:0 0 8px;font-size:1.5rem">${esc(nm())}</h3><div class="shots">${[1, 1, 0, 0, 0].map(u => `<i class="${u ? 'u' : ''}"></i>`).join('')}</div><p class="lf"><b>3</b> jatah foto tersisa</p><p class="mini" style="margin:8px 0 4px">Tamu memilih frame kolase:</p><div class="frames">${['single', 'duo', 'strip3', 'strip4', 'grid4', 'grid6'].map(k => `<div class="fr">${frameThumb(k)}<b>${FRAMES[k].n}</b></div>`).join('')}</div><button type="button" class="full" data-fake style="margin-top:12px">Mulai photobooth</button><button type="button" class="ghost full" data-fake>Lihat semua foto album</button><p class="mini" style="text-align:center">${esc(gmsg())}</p>`;
+    $('gprev').innerHTML = `<div class="gbn" style="margin-top:0">${media(D.ban)}</div><span class="gb">Photobooth</span><h3 style="margin:0 0 8px;font-size:1.5rem">${esc(nm())}</h3><div class="shots">${[1, 1, 0, 0, 0].map(u => `<i class="${u ? 'u' : ''}"></i>`).join('')}</div><p class="lf"><b>3</b> jatah foto tersisa</p><p class="mini" style="margin:8px 0 4px">Tamu memilih template kolase, lalu bisa bagikan ke Story:</p><div class="frames">${[TPL_ORDER[0], TPL_ORDER[1], TPL_ORDER[4], 'strip3', 'duo', 'grid4'].map(k => `<div class="fr">${frameThumb(k)}<b>${FRAMES[k].n}</b></div>`).join('')}</div><button type="button" class="full" data-fake style="margin-top:12px">Mulai photobooth</button><button type="button" class="ghost full" data-fake>Lihat semua foto album</button><p class="mini" style="text-align:center">${esc(gmsg())}</p>`;
     $('gprev').querySelectorAll('[data-fake]').forEach(b => b.onclick = () => alert('Ini hanya contoh tampilan. Di album sungguhan, tombol ini membuka kamera HP tamu.'));
   };
   $('dn').oninput = () => { D.name = $('dn').value; paint(); };
@@ -918,7 +1150,7 @@ function demo() {
   $('dpt').onclick = () => posterModal({ name: nm() === 'Nama acaramu' ? 'Pernikahan Dina & Raka' : nm() }, { cam: base() + '?demo=1', alb: base() + '?demo=1' }, 'cam');
   $('dgo').onclick = () => nav(location.pathname + '#paket');
   $('dex').onclick = () => nav(location.pathname);
-  paint();
+  paint(); loadTplFonts().then(() => { TPL_TH = {}; paint(); });
 }
 
 const promoHTML = () => `<div class="promo"><b>Suka dengan Momentkan?</b><p>Buat album acaramu sendiri dan biarkan semua tamu ikut memotret.</p><div class="row"><a class="logo-btn" href="${base()}" target="_blank" rel="noopener" aria-label="Kenali Momentkan">${logoSVG(30)}<span>Momentkan</span></a>${IG_USER ? `<a class="btn sm ghost" href="https://www.instagram.com/${esc(IG_USER)}" target="_blank" rel="noopener">Instagram</a>` : ''}</div></div>`;
@@ -953,6 +1185,16 @@ async function dash(id) {
   <div class="card"><label class="sw" style="margin:0"><input type="checkbox" id="gv" ${gvOn ? 'checked' : ''}><span class="tg"></span>Izinkan tamu melihat album</label>
     <p class="mini" style="margin:8px 0 0">${!gvOn ? 'Tamu tidak bisa melihat album. Mereka hanya melihat pemberitahuan bahwa kamu belum mengizinkan.' : open ? 'Album sudah bisa dilihat semua tamu lewat link album.' : 'Tamu melihat pemberitahuan: album bisa dilihat mulai ' + fmt(e.reveal_at) + '.'}</p>
     ${gvOn && !open ? '<button class="sm" id="op" style="margin-top:10px">Buka untuk tamu sekarang</button>' : ''}</div>
+  <div class="card" id="tpc"><h3 style="margin:0 0 4px">Template kolase tamu</h3>
+    <p class="mini" style="margin:0 0 10px">Tamu memilih template lucu untuk kolase mereka lalu bisa langsung membagikannya ke Story Instagram. Ubah tulisan di template lewat isian di bawah.</p>
+    <div class="tpw"><canvas id="tpv"></canvas></div>
+    <div class="fstrip" id="tps">${Object.entries(TPLS).map(([k, t], i) => `<button type="button" class="chip ghost${i === 0 ? ' on' : ''}" data-k="${k}">${t.n}${i >= (TPL_LIMIT[e.plan] || TPL_LIMIT.basic) ? ' 🔒' : ''}</button>`).join('')}</div>
+    <p class="mini" style="margin:4px 0 0">Paket ${(PLANS[e.plan] || PLANS.basic).name} bisa memakai ${TPL_LIMIT[e.plan] || TPL_LIMIT.basic} template. Yang bertanda 🔒 tersedia di paket lebih tinggi.</p>
+    <label for="tp1">Teks kecil (contoh: The Wedding of)</label><input id="tp1" maxlength="30">
+    <label for="tp2">Nama (contoh: Dina &amp; Raka)</label><input id="tp2" maxlength="30">
+    <label for="tp3">Tanggal (contoh: 23 . 08 . 2025)</label><input id="tp3" maxlength="30">
+    <label for="tp4">Ucapan terima kasih</label><input id="tp4" maxlength="40">
+    <button class="full" id="tpsv">Simpan template</button></div>
   <h2>Galeri</h2>
   ${photos.length ? '' : '<div class="empty">Belum ada foto. Minta tamu scan QR di atas.</div>'}
   <div class="wall">${photos.map((p, i) => `<figure class="pol"><button class="pimg" data-open="${i}" aria-label="Lihat foto"><img loading="lazy" src="${purl(thumbOf(p.path))}" onerror="this.onerror=null;this.src='${purl(p.path)}'" alt="Foto oleh ${esc(p.guest_name)}"></button><span class="nm">${esc(p.guest_name || 'Tamu')}</span><span class="pa"><a download href="${purl(p.path, 'momentkan-' + p.id.slice(0, 6) + '.jpg')}" aria-label="Unduh">↓</a><button data-del="${p.id}" aria-label="Hapus">✕</button></span></figure>`).join('')}</div>`;
@@ -1006,6 +1248,24 @@ async function dash(id) {
   $('gv').onchange = async () => { const u = await sb.from('events').update({ guest_view: $('gv').checked }).eq('id', id); if (u.error) alert(u.error.message); dash(id); };
   const op = $('op');
   if (op) op.onclick = async () => { await sb.from('events').update({ reveal_at: new Date().toISOString() }).eq('id', id); dash(id); };
+  // template kolase
+  {
+    const c0 = e.tpl || {}, ids = { pre: 'tp1', names: 'tp2', date: 'tp3', thanks: 'tp4' };
+    const v0 = { pre: c0.pre ?? 'The Wedding of', names: c0.names ?? e.name, date: c0.date ?? '', thanks: c0.thanks ?? TPL_SAMPLE.thanks };
+    Object.entries(ids).forEach(([k, i]) => $(i).value = v0[k]);
+    let sel = TPL_ORDER[0];
+    const cur = () => Object.fromEntries(Object.entries(ids).map(([k, i]) => [k, $(i).value.trim()]));
+    const drawP = () => { const cv = composeTpl({ imgs: [], id: sel, scale: .3, tpl: cur(), thumb: true }, z => z), c = $('tpv'); c.width = cv.width; c.height = cv.height; c.getContext('2d').drawImage(cv, 0, 0); };
+    drawP(); loadTplFonts().then(drawP);
+    Object.values(ids).forEach(i => $(i).oninput = drawP);
+    app.querySelectorAll('#tps .chip').forEach(c => c.onclick = () => { sel = c.dataset.k; app.querySelectorAll('#tps .chip').forEach(z => z.classList.toggle('on', z === c)); drawP(); });
+    $('tpsv').onclick = async () => {
+      const b = $('tpsv'); b.disabled = true; b.textContent = 'Menyimpan…';
+      const u = await sb.from('events').update({ tpl: cur() }).eq('id', id);
+      b.disabled = false; if (u.error) { b.textContent = 'Simpan template'; return alert('Gagal menyimpan: ' + u.error.message + '\n\nPastikan SQL template sudah dijalankan di Supabase.'); }
+      b.textContent = 'Tersimpan ✓'; setTimeout(() => b.textContent = 'Simpan template', 1800);
+    };
+  }
   // galeri
   const byId = pid => photos.find(p => p.id === pid);
   const delPhoto = async p => { if (!confirm('Hapus foto ini?')) return false; await sb.storage.from('photos').remove([p.path, thumbOf(p.path)]); await sb.from('photos').delete().eq('id', p.id); return true; };
@@ -1066,6 +1326,10 @@ async function guest(id) {
   const s0 = (sr.data && sr.data[0]) || { used: 0, guest_full: false };
   const mp = await sb.rpc('my_photos', { eid: id, gid });
   let used = s0.used, full = s0.guest_full, limit = e.shots_per_guest || 5;
+  let tplCfg = {}, plan = e.plan || 'basic';
+  try { const tr = await sb.rpc('get_tpl', { eid: id }); const row = tr.data && (Array.isArray(tr.data) ? tr.data[0] : tr.data); if (row) { tplCfg = row.tpl || {}; plan = row.plan || plan; } } catch (x) {}
+  const tplT = tplText(tplCfg, e.name); TPL_CUR = Object.assign({}, TPL_SAMPLE, tplT);
+  await loadTplFonts();
   let name = localStorage.getItem('sr_name') || '', pending = 0;
   window.onbeforeunload = ev => { if (pending) { ev.preventDefault(); ev.returnValue = ''; } };
   const mine = (mp.data || []).map(r => ({ url: purl(r.path), thumb: purl(thumbOf(r.path)), dl: purl(r.path, 'momentkan-' + r.path.slice(-10)), name: r.guest_name || 'Tamu' }));
@@ -1078,7 +1342,7 @@ async function guest(id) {
   const left = () => Math.max(0, limit - used);
   const drawRoll = () => { roll.innerHTML = `<div class="shots" role="img" aria-label="${used} dari ${limit} jatah terpakai">${Array.from({ length: limit }, (_, i) => `<i class="${i < used ? 'u' : ''}"></i>`).join('')}</div><p class="lf"><b>${left()}</b> jatah foto tersisa</p>`; };
   const drawTh = () => { th.innerHTML = mine.map((m, i) => `<button class="thb${m.pend ? ' pend' : ''}" data-i="${i}" aria-label="Lihat fotomu"><img src="${m.thumb || m.url}" onerror="this.onerror=null;this.src='${m.url}'" alt="Fotomu"></button>`).join(''); th.querySelectorAll('.thb').forEach(b => b.onclick = () => viewer(mine, Number(b.dataset.i))); };
-  let frame = 'strip3', fcol = 'putih', curF = 'original', shots = [], pend = -1, stage = 'intro';
+  let frame = TPL_ORDER[0], ftab = 'tpl', lastShare = null, shareUrl = '', fcol = 'putih', curF = 'original', shots = [], pend = -1, stage = 'intro';
   const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.setAttribute('capture', 'environment'); inp.hidden = true; app.appendChild(inp);
   inp.onchange = ev => {
     const f = ev.target.files[0]; ev.target.value = ''; if (!f || pend < 0) return;
@@ -1092,20 +1356,45 @@ async function guest(id) {
     im.src = URL.createObjectURL(f);
   };
 
-  const intro = () => {
+  const introBase = () => {
     stage = 'intro'; shots = []; pend = -1; drawRoll();
     if (full) { st.innerHTML = '<div class="card"><h2>Kuota tamu penuh</h2><p>Album ini sudah mencapai batas jumlah tamu. Terima kasih sudah mampir!</p></div>'; return; }
     if (!left()) { st.innerHTML = '<div class="card"><h2>Jatahmu sudah habis</h2><p>Terima kasih sudah ikut mengabadikan momen ini. Kamu tetap bisa melihat album lewat tombol di bawah.</p></div>'; return; }
-    st.innerHTML = `<label for="gn">Nama kamu</label><input id="gn" maxlength="30" value="${esc(name)}" placeholder="Tamu"><button class="full shut" id="go">Mulai photobooth</button><p class="hint">Pilih frame kolase, ambil fotonya, lalu pilih filter dan kirim. Satu hasil dihitung satu jatah.</p>`;
+    st.innerHTML = `<label for="gn">Nama kamu</label><input id="gn" maxlength="30" value="${esc(name)}" placeholder="Tamu"><button class="full shut" id="go">Mulai photobooth</button><p class="hint">Pilih template kolase, ambil fotonya, lalu pilih filter dan kirim. Satu hasil dihitung satu jatah.</p>`;
     document.getElementById('go').onclick = () => { name = document.getElementById('gn').value.trim(); localStorage.setItem('sr_name', name); pickFrame(); };
   };
 
+  const addShare = () => {
+    if (!lastShare) return;
+    const d = document.createElement('div'); d.className = 'card'; d.style.textAlign = 'center';
+    d.innerHTML = `<img src="${shareUrl}" alt="Hasil kolasemu" style="width:58%;border-radius:10px;box-shadow:0 8px 24px rgba(27,31,59,.18)"><h3 style="margin:12px 0 2px">Kolasemu sudah jadi!</h3><p class="mini" style="margin:0 0 6px">Bagikan ke Story Instagram atau simpan ke galeri HP.</p><button class="full ig" id="igs" style="margin-top:8px">Bagikan ke Instagram Story</button><button class="ghost full" id="dlg" style="margin-top:8px">Simpan ke HP</button><p class="mini" id="igm" style="margin-bottom:0"></p>`;
+    st.prepend(d);
+    const file = new File([lastShare], 'momentkan-story.jpg', { type: 'image/jpeg' }), im = d.querySelector('#igm');
+    const save = () => { const a = document.createElement('a'); a.href = shareUrl; a.download = 'momentkan-story.jpg'; document.body.appendChild(a); a.click(); a.remove(); };
+    d.querySelector('#dlg').onclick = () => { save(); im.textContent = 'Foto disimpan ke HP.'; };
+    d.querySelector('#igs').onclick = async () => {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file] }); im.textContent = 'Pilih Instagram → Story di menu yang muncul.'; } catch (x) { if (x.name !== 'AbortError') im.textContent = 'Gagal membuka menu bagikan. Coba tombol Simpan ke HP.'; }
+        return;
+      }
+      save(); im.textContent = 'Foto tersimpan. Membuka Instagram… pilih foto ini dari galeri untuk Story.';
+      setTimeout(() => { location.href = 'instagram://story-camera'; }, 900);
+    };
+  };
+  const intro = () => { introBase(); addShare(); };
+
   const pickFrame = () => {
     stage = 'pick';
-    st.innerHTML = `<h3 style="margin:6px 0 0">Pilih frame</h3><div class="frames">${Object.entries(FRAMES).map(([k, f]) => `<button type="button" class="fr${k === frame ? ' on' : ''}" data-k="${k}">${frameThumb(k)}<b>${f.n}</b><span>${f.c} foto</span></button>`).join('')}</div><button class="full" id="fgo">Lanjut</button><button class="ghost full" id="fbk" style="margin-top:8px">Kembali</button>`;
-    st.querySelectorAll('.fr').forEach(b => b.onclick = () => { frame = b.dataset.k; st.querySelectorAll('.fr').forEach(x => x.classList.toggle('on', x === b)); });
-    document.getElementById('fgo').onclick = () => { shots = new Array(FRAMES[frame].c).fill(null); capture(); };
-    document.getElementById('fbk').onclick = intro;
+    const show = () => {
+      const list = ftab === 'tpl' ? tplIds(plan).map(k => [k, FRAMES[k]]) : Object.entries(FRAMES).filter(([, f]) => !f.tpl);
+      if (!list.some(([k]) => k === frame)) frame = list[0][0];
+      st.innerHTML = `<h3 style="margin:6px 0 8px">Pilih template</h3><div class="seg" id="ft"><button class="${ftab === 'tpl' ? 'on' : ''}" data-t="tpl">Template lucu</button><button class="${ftab === 'plain' ? 'on' : ''}" data-t="plain">Frame polos</button></div><div class="frames">${list.map(([k, f]) => `<button type="button" class="fr${k === frame ? ' on' : ''}" data-k="${k}">${frameThumb(k)}<b>${f.n}</b><span>${f.c} foto</span></button>`).join('')}</div><button class="full" id="fgo">Lanjut</button><button class="ghost full" id="fbk" style="margin-top:8px">Kembali</button>`;
+      st.querySelectorAll('#ft button').forEach(b => b.onclick = () => { ftab = b.dataset.t; show(); });
+      st.querySelectorAll('.fr').forEach(b => b.onclick = () => { frame = b.dataset.k; st.querySelectorAll('.fr').forEach(x => x.classList.toggle('on', x === b)); });
+      document.getElementById('fgo').onclick = () => { shots = new Array(FRAMES[frame].c).fill(null); capture(); };
+      document.getElementById('fbk').onclick = intro;
+    };
+    show();
   };
 
   const capture = () => {
@@ -1115,7 +1404,7 @@ async function guest(id) {
     st.innerHTML = `<p class="mini" style="margin:4px 0">${f.n} · foto ${next + 1} dari ${f.c}</p><div id="cp"></div><button class="full shut" id="snap">Ambil foto ${next + 1}</button><button class="ghost full" id="chg" style="margin-top:8px">Ganti frame</button>`;
     if (frame !== 'single') {
       const L = layoutOf(frame);
-      const cv = composeFrame({ imgs: shots, id: frame, col: fcol, f: 'original', r: null, scale: Math.min(1, 480 / L.W), guest: name, ev: e.name });
+      const cv = composeFrame({ imgs: shots, id: frame, col: fcol, f: 'original', r: null, scale: Math.min(1, 480 / L.W), guest: name, ev: e.name, tpl: tplT });
       cv.style.cssText = 'width:100%;display:block;border-radius:10px;box-shadow:0 8px 24px rgba(27,31,59,.15);cursor:pointer';
       document.getElementById('cp').appendChild(cv);
       cv.onclick = ev => { const i = slotAt(cv, ev, L); if (i >= 0) { pend = i; inp.click(); } };
@@ -1131,11 +1420,11 @@ async function guest(id) {
     const single = frame === 'single', L = single ? null : layoutOf(frame);
     st.innerHTML = `<div id="pv"></div>
     ${gl ? `<label>Filter</label><div class="fstrip" id="fs" role="group" aria-label="Pilih filter">${Object.entries(FILTERS).map(([k, v]) => `<button class="chip ghost${k === curF ? ' on' : ''}" data-f="${k}">${v}</button>`).join('')}</div>` : ''}
-    ${single ? '' : `<label>Warna frame</label><div class="chips" id="fc" style="justify-content:flex-start">${Object.entries(COLS).map(([k, v]) => `<button class="chip ghost${k === fcol ? ' on' : ''}" data-c="${k}">${v[0]}</button>`).join('')}</div><p class="mini">Ketuk salah satu foto di kolase untuk mengambilnya ulang.</p>`}
+    ${single ? '' : FRAMES[frame].tpl ? '<p class="mini">Ketuk salah satu foto di kolase untuk mengambilnya ulang.</p>' : `<label>Warna frame</label><div class="chips" id="fc" style="justify-content:flex-start">${Object.entries(COLS).map(([k, v]) => `<button class="chip ghost${k === fcol ? ' on' : ''}" data-c="${k}">${v[0]}</button>`).join('')}</div><p class="mini">Ketuk salah satu foto di kolase untuk mengambilnya ulang.</p>`}
     <p class="mini" style="text-align:center;margin-top:10px">Atas nama <b>${esc(name || 'Tamu')}</b></p>
     <div class="row" style="margin-top:10px"><button id="sd" style="flex:1">Kirim</button><button class="ghost" id="rt">Ulangi</button></div>`;
     const draw = () => {
-      const cv = composeFrame({ imgs: shots, id: frame, col: fcol, f: curF, r: gl, scale: single ? .45 : Math.min(1, 640 / L.W), guest: name, ev: e.name });
+      const cv = composeFrame({ imgs: shots, id: frame, col: fcol, f: curF, r: gl, scale: single ? .45 : Math.min(1, 640 / L.W), guest: name, ev: e.name, tpl: tplT });
       cv.style.cssText = 'width:100%;display:block;border-radius:10px;box-shadow:0 8px 24px rgba(27,31,59,.15)' + (single ? '' : ';cursor:pointer');
       if (!single) cv.onclick = ev => { const i = slotAt(cv, ev, L); if (i >= 0) { pend = i; inp.click(); } };
       const box = document.getElementById('pv'); box.innerHTML = ''; box.appendChild(cv);
@@ -1148,7 +1437,7 @@ async function guest(id) {
       const b = document.getElementById('sd'); b.disabled = true; b.textContent = 'Menyiapkan…';
       const nm = name || 'Tamu';
       setTimeout(async () => {
-        const full = composeFrame({ imgs: shots, id: frame, col: fcol, f: curF, r: gl, scale: 1, guest: nm, ev: e.name });
+        const full = composeFrame({ imgs: shots, id: frame, col: fcol, f: curF, r: gl, scale: 1, guest: nm, ev: e.name, tpl: tplT });
         const k = Math.min(1, 480 / Math.min(full.width, full.height), 900 / Math.max(full.width, full.height));
         const t = document.createElement('canvas'); t.width = Math.round(full.width * k); t.height = Math.round(full.height * k); t.getContext('2d').drawImage(full, 0, 0, t.width, t.height);
         const toB = (cv, q) => new Promise(r2 => cv.toBlob(r2, 'image/jpeg', q));
@@ -1158,6 +1447,7 @@ async function guest(id) {
   };
 
   const sendOut = async (blob, thumb, nm) => {
+    lastShare = blob; if (shareUrl) URL.revokeObjectURL(shareUrl); shareUrl = URL.createObjectURL(blob);
     const item = { url: URL.createObjectURL(blob), name: nm, pend: true };
     mine.unshift(item); used++; pending++; drawTh(); intro();
     ms('Hasilmu dikirim di latar belakang. Kamu bisa lanjut, tapi jangan tutup halaman ini.', true);
