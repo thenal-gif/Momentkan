@@ -1261,7 +1261,7 @@ async function dash(id) {
     app.querySelectorAll('#tps .chip').forEach(c => c.onclick = () => { sel = c.dataset.k; app.querySelectorAll('#tps .chip').forEach(z => z.classList.toggle('on', z === c)); drawP(); });
     $('tpsv').onclick = async () => {
       const b = $('tpsv'); b.disabled = true; b.textContent = 'Menyimpan…';
-      const u = await sb.from('events').update({ tpl: cur() }).eq('id', id);
+      const u = await sb.rpc('save_tpl', { eid: id, t: cur() });
       b.disabled = false; if (u.error) { b.textContent = 'Simpan template'; return alert('Gagal menyimpan: ' + u.error.message + '\n\nPastikan SQL template sudah dijalankan di Supabase.'); }
       b.textContent = 'Tersimpan ✓'; setTimeout(() => b.textContent = 'Simpan template', 1800);
     };
